@@ -9,5 +9,5 @@
         "--init-hook",
         "import sys; sys.path.insert(0, './')"
     ],
-    "python.envFile": ".env",
+    "python.envFile": "${workspaceFolder}/.env",
 }

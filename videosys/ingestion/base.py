@@ -60,6 +60,9 @@ class Context:
     def put(self, key, value):
         self.dict[key] = value
 
+    def has(self, key):
+        return key in self.dict
+
 class PipelineController:
     def __init__(self):
         self.__cv = threading.Condition()
