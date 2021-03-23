@@ -1,0 +1,13 @@
+{
+    "python.linting.pylintEnabled": true,
+    "editor.tabSize": 4,
+    "python.pythonPath": ${condaPythonPath},
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/videosys;${workspaceFolder}/tests",
+    },
+    "python.linting.pylintArgs": [
+        "--init-hook",
+        "import sys; sys.path.insert(0, './')"
+    ],
+    "python.envFile": ".env",
+}
