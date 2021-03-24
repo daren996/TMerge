@@ -20,9 +20,11 @@ class Operator:
         self.collector = None
         self.context = None
     
-    def _get_config(self, key, default_value):
+    def _get_config(self, key, default_value=None):
         if key in self.config:
             return self.config[key]
+        if default_value is None:
+            raise LookupError('config "{}" is required'.format(key))
         return default_value
 
     def setup(self, context=None, collector=None, controller=None):
@@ -40,7 +42,7 @@ class Operator:
     def prepare(self):
         pass
 
-    def process(self, row=None):
+    def process(self, tables):
         pass
 
     def cleanup(self):

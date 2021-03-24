@@ -2,7 +2,7 @@ import cv2
 
 from videosys.utils.visualize_utils import listen_key_events, add_text_to_image
 from videosys.ingestion import fields
-from .base import Operator
+from videosys.ingestion.base import Operator
 
 class ImageVisualizer(Operator):
     def __init__(self, config):

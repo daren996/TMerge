@@ -1,6 +1,6 @@
-from videosys.ingestion.visualize import ImageVisualizer
+from videosys.ingestion.visualize.image import ImageVisualizer
 from videosys.ingestion.base import SimplePipelineBuilder
-from videosys.ingestion.io import ImageSource, VideoSource
+from videosys.ingestion.io.base import ImageSource, VideoSource
 
 def play_video(video_path, auto_play=False):
     print('play video:', video_path)

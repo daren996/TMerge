@@ -1,1 +1,2 @@
-export PYTHONPATH=$(pwd)
+CURRENT_FOLDER=$(pwd)
+export PYTHONPATH=$CURRENT_FOLDER:$CURRENT_FOLDER/../mmdetection/:

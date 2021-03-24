@@ -1,13 +1,14 @@
 '''
-Source operators
+Source & Sink operators
 '''
-import cv2
 import os
 from functools import cmp_to_key
+import cv2
 
-from .base import Operator, Source
 from videosys.ingestion import fields, data
+from videosys.ingestion.base import Source, Operator
 
+# ============ source operators
 class VideoSource(Source):
 
     def prepare(self):
@@ -21,7 +22,7 @@ class VideoSource(Source):
         self.__video = video
         self.fid = 0
 
-    def process(self):
+    def process(self, tables=None):
         if self.__video.isOpened():
             ret, frame = self.__video.read()
             if ret:
@@ -48,13 +49,15 @@ class ImageSource(Source):
         self.context.put(fields.META_IMAGE, data.ImageFolderMeta(len(self.images)))
         self.current = 0
 
-    def process(self):
+    def process(self, tables=None):
         frame = cv2.imread(self.images[self.current][0])
         self.collector.emit({fields.DATA_FRAME: frame, fields.DATA_FRAME_ID: self.current})
         self.current += 1
     
     def has_next(self):
         return self.current +1 < len(self.images)
+    
+# =============== sink operators
     
 class VideoSink(Operator):
     pass

@@ -1,4 +1,6 @@
+from videosys.utils.color import color_val
 import cv2
+import numpy as np
 
 def listen_key_events(window, funcs, wait_timeout=1000, on_close=None):
     '''
@@ -23,4 +25,20 @@ def add_text_to_image(image, txt, line_height=40, copy_image=True, font_color = 
     for (i, line) in enumerate(txt):
         cv2.putText(image, line, (left_offset, line_height * (i+1)), font, \
             font_scale, font_color, line_type)
+    return image
+
+def draw_bbox_and_labels(image, objs, bbox_func, label_func, \
+    copy_image = True, bbox_color='green', label_color='green', thickness=1, \
+        font = cv2.FONT_HERSHEY_SIMPLEX, font_scale=0.5):
+    bbox_color = color_val(bbox_color)
+    label_color = color_val(label_color)
+    if copy_image:
+        image = image.copy()
+    for obj in objs:
+        bbox = bbox_func(obj).astype(np.int32)
+        left_top = (bbox[0], bbox[1])
+        right_bottom = (bbox[2], bbox[3])
+        cv2.rectangle(image, left_top, right_bottom, bbox_color, thickness=thickness)
+        label_txt = label_func(obj)
+        cv2.putText(image, label_txt, (bbox[0], bbox[1]-2), font, font_scale, label_color)
     return image
