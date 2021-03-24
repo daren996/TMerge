@@ -13,7 +13,7 @@ class ObjectTrackingVisualizer(Operator):
         self.__class_names = self.context.get(fields.META_OBJECT_DETECTION_CLASSES)
     
     def __extract_bbox(self, tracklet):
-        return tracklet.bbox
+        return tracklet.payload.bbox
 
     def __generate_label(self, tracklet):
         return '{}/{}:{:0.2f}'.format(tracklet.uid,

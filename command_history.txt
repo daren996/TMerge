@@ -11,3 +11,6 @@ pip install mmcv-full==1.2.7 -f https://download.openmmlab.com/mmcv/dist/cu102/t
 # for mmdetection
 pip install -r ../mmdetection/requirements/build.txt
 pip install terminaltables mmpycocotools
+
+# for SORT
+pip install lap scipy filterpy

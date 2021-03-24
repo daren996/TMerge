@@ -1,3 +1,4 @@
+from videosys.ingestion.tracking.sort_tracker import SORTOnlineTracker
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 from videosys.ingestion.visualize.detection import ObjectDetectionVisualizer
 from videosys.ingestion.objectdetection.mmdet import MMDetObjectDetector
@@ -26,7 +27,8 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
         'config_file': config_file,
         'checkpoint_file': checkpoint_file,
     }))
-    builder.add_operator(IOUOnlineTracker())
+    # builder.add_operator(IOUOnlineTracker())
+    builder.add_operator(SORTOnlineTracker())
     builder.add_operator(ObjectTrackingVisualizer())
     builder.build().start()
 

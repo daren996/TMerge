@@ -69,7 +69,7 @@ class IOUTracker:
             
         # create new tracks
         new_tracks = [self.__new_tracker(det) for det in dets]
-        tracklet_in_frame = [*updated_tracks]
+        tracklet_in_frame = updated_tracks[:]
         for tracklet in new_tracks:
             self.trackers_active[tracklet.uid] = tracklet
             tracklet_in_frame.append(tracklet)
