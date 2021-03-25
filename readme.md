@@ -10,6 +10,7 @@ The parent folder structure:
 - parent_folder:
     - video-sys (this project)
     - mmdetection (clone the repository from mmdetection project).
+    - CenterNet (clone from `https://github.com/yestinchen/CenterNet.git`)
     
 ```
 

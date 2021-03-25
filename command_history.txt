@@ -19,3 +19,5 @@ pip install lap scipy filterpy
 pip install lapsolver
 # for Deep SORT, or install tensorflow (cpu only)
 pip install tensorflow-gpu==2.4.0
+# for CenterNet
+pip install progress

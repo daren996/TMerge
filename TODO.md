@@ -8,3 +8,4 @@
   * DeepSORT (TODO)
 * MIT license:
   * iou_tracker
+  * CenterNet

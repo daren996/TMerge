@@ -3,8 +3,8 @@ from mmdet.apis import init_detector, inference_detector
 
 from videosys.ingestion import fields
 
-from ..base import Operator
 from videosys.ingestion.data import ObjectDetectionResult
+from ..base import Operator
 
 class MMDetObjectDetector(Operator):
     '''
