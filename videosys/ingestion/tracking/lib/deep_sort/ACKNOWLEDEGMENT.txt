@@ -1,0 +1,3 @@
+Source code modified from deep_sort project
+
+https://github.com/nwojke/deep_sort

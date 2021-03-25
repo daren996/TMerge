@@ -17,3 +17,5 @@ pip install terminaltables mmpycocotools
 pip install lap scipy filterpy
 # for viou tracker
 pip install lapsolver
+# for Deep SORT, or install tensorflow (cpu only)
+pip install tensorflow-gpu==2.4.0
