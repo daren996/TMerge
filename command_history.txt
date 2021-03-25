@@ -3,7 +3,8 @@ conda activate vsys
 #conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=10.2 -c pytorch
 #conda install -c conda-forge opencv=4.1.0
 pip install --upgrade pip
-pip install opencv-python
+#pip install opencv-python
+pip install opencv-contrib-python==4.4.0.46
 pip install torch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2
 conda install pylint
 pip install mmcv-full==1.2.7 -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.7.0/index.html
@@ -14,3 +15,5 @@ pip install terminaltables mmpycocotools
 
 # for SORT
 pip install lap scipy filterpy
+# for viou tracker
+pip install lapsolver

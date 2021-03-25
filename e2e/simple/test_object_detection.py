@@ -4,7 +4,7 @@ from videosys.ingestion.visualize.detection import ObjectDetectionVisualizer
 from videosys.ingestion.objectdetection.mmdet import MMDetObjectDetector
 from videosys.ingestion.base import SimplePipelineBuilder
 from videosys.ingestion.io.base import VideoSource
-from videosys.ingestion.tracking.iou_tracker import IOUOnlineTracker
+from videosys.ingestion.tracking.viou_tracker import VIOUOnlineTracker
 
 def detect_mmdet(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
@@ -28,7 +28,10 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
         'checkpoint_file': checkpoint_file,
     }))
     # builder.add_operator(IOUOnlineTracker())
-    builder.add_operator(SORTOnlineTracker())
+    builder.add_operator(VIOUOnlineTracker({
+        'tracker': 'MIL'
+    }))
+    # builder.add_operator(SORTOnlineTracker())
     builder.add_operator(ObjectTrackingVisualizer())
     builder.build().start()
 

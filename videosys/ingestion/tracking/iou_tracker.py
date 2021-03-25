@@ -49,16 +49,18 @@ class IOUTracker:
                 idx, best_match = max(enumerate(dets), \
                     key=lambda x: iou(tracklet.bboxes[-1], x[1].bbox))
                 if iou(tracklet.bboxes[-1], best_match.bbox) >= self.iou_threshold:
+                    # update.
                     tracklet.bboxes.append(best_match.bbox)
                     tracklet.max_score = max(tracklet.max_score, best_match.confidence)
                     # update payload.
                     tracklet.payload = best_match
+                    tracklet.count += 1
+
                     updated_tracks.append(tracklet)
                     # remove from best matching detection from detections
                     del dets[idx]
                     found = True
-                    # update
-                    tracklet.count += 1
+                    # add to updated
                     updated_tracks.append(tracklet)
 
             if not found:
@@ -122,7 +124,7 @@ class IOUBatchTracker(Operator):
     def cleanup(self):
         # filter based on other two params.
         keep_set = set()
-        for uid, tracklet in self.max_tracklets:
+        for uid, tracklet in self.max_tracklets.items():
             if tracklet.max_score >= self.__max_detection_confidence and \
                 len(tracklet.bboxes) >= self.__t_min:
                 keep_set.add(uid)
