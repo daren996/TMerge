@@ -20,3 +20,5 @@ DATA_FRAME = 'frame'
 DATA_OBJECT_DETECTION = 'obj_det'
 
 DATA_OBJECT_TRACK = 'obj_track'
+
+DATA_OBJECT_TRACK_GT = 'obj_track_gt'

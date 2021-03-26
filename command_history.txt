@@ -21,3 +21,5 @@ pip install lapsolver
 pip install tensorflow-gpu==2.4.0
 # for CenterNet
 pip install progress
+# for MOT metrics
+pip install motmetrics

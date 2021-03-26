@@ -99,7 +99,7 @@ class IOUBatchTracker(Operator):
 
     def prepare(self):
         self.__ttl = self._get_config('ttl', -1)
-        self.__result_only = self._get_config('result_only', True)
+        self.__result_only = self._get_config('result_only', False)
         self.__max_detection_confidence = self._get_config('max_conf', 0.5)
         # at least how many frames an object should appear
         self.__t_min = self._get_config('t_min', 5)
@@ -128,8 +128,11 @@ class IOUBatchTracker(Operator):
             if tracklet.max_score >= self.__max_detection_confidence and \
                 len(tracklet.bboxes) >= self.__t_min:
                 keep_set.add(uid)
-        for idx, frame_result in enumerate(self.track_results):
-            tables = self.buffered_tables[idx] if not self.__result_only else {}
-            tables[fields.DATA_OBJECT_TRACK] = [i for i in frame_result if i.uid in keep_set]
-            self.collector.emit(tables)
+        if self.__result_only:
+            for frame_result in self.track_results:
+                self.collector.emit({fields.DATA_OBJECT_TRACK: [i for i in frame_result if i.uid in keep_set]})
+        else:
+            for tables, frame_result in zip(self.buffered_tables, self.track_results):
+                tables[fields.DATA_OBJECT_TRACK] = [i for i in frame_result if i.uid in keep_set]
+                self.collector.emit(tables)
         

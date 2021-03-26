@@ -1,3 +1,5 @@
+
+import logging
 import cv2
 
 from videosys.ingestion import fields
@@ -12,13 +14,18 @@ class ObjectDetectionVisualizer(Operator):
         self.__threshold = self._get_config('threshold', 0.3)
 
     def prepare(self):
-        self.__class_names = self.context.get(fields.META_OBJECT_DETECTION_CLASSES)
-    
+        if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):
+            self.__class_names = self.context.get(fields.META_OBJECT_DETECTION_CLASSES)
+        else:
+            self.__class_names = None
+            logging.warning("warning: NO CLASSES given, will use label values")
 
     def __extract_bbox(self, detect_result):
         return detect_result.bbox
 
     def __generate_label(self, detect_result):
+        if self.__class_names is None:
+            return '({}):{:0.2f}'.format(detect_result.label, detect_result.confidence)
         return '{}:{:0.2f}'.format(self.__class_names[detect_result.label], 
             detect_result.confidence)
 

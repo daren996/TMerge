@@ -147,11 +147,11 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
         matched_indices = np.empty(shape=(0,2))
 
     unmatched_detections = []
-    for d in range(detections):
+    for d in range(len(detections)):
         if d not in matched_indices[:,0]:
             unmatched_detections.append(d)
     unmatched_trackers = []
-    for t in range(trackers):
+    for t in range(len(trackers)):
         if(t not in matched_indices[:,1]):
             unmatched_trackers.append(t)
 

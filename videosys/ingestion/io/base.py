@@ -26,9 +26,9 @@ class VideoSource(Source):
         if self.__video.isOpened():
             ret, frame = self.__video.read()
             if ret:
+                self.fid += 1
                 self.collector.emit({fields.DATA_FRAME:frame, \
                     fields.DATA_FRAME_ID: self.fid})
-                self.fid += 1
 
     def has_next(self):
         return self.__video.isOpened()
@@ -40,7 +40,7 @@ class ImageSource(Source):
     def prepare(self):
         # read images.
         images = []
-        for root, _, files in os.walk(self.config['folder']):
+        for root, _, files in os.walk(self._get_config('folder')):
             for file in files:
                 images.append((os.path.join(root, file), int(file[:file.index('.')])))
         self.images = images
@@ -50,9 +50,9 @@ class ImageSource(Source):
         self.current = 0
 
     def process(self, tables=None):
+        self.current += 1
         frame = cv2.imread(self.images[self.current][0])
         self.collector.emit({fields.DATA_FRAME: frame, fields.DATA_FRAME_ID: self.current})
-        self.current += 1
     
     def has_next(self):
         return self.current +1 < len(self.images)
