@@ -17,11 +17,11 @@ def run_mot(source_path, mot_det):
     builder.add_operator(MOTDetLoader({
         'folder_path': mot_det
     }))
-    builder.add_operator(VIOUOnlineTracker())
+    # builder.add_operator(VIOUOnlineTracker())
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(IOUBatchTracker())
     # builder.add_operator(SORTOnlineTracker())
-    # builder.add_operator(DeepSORTOnlineTracker())
+    builder.add_operator(DeepSORTOnlineTracker())
     builder.add_operator(MOTGTLoader({
         'folder_path': mot_det
     }))

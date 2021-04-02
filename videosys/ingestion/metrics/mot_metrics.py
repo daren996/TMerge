@@ -25,6 +25,11 @@ class MOTMetricsReporter(Operator):
         oids = np.array([i.uid for i in track_gt])
         hboxes = np.array([i.bbox for i in track_result])
         oboxes = np.array([i.bbox for i in track_gt])
+        # transform to x,y, w,h
+        hboxes[:,2] = hboxes[:,2] - hboxes[:,0]
+        hboxes[:,3] = hboxes[:,3] - hboxes[:,1]
+        oboxes[:,2] = oboxes[:,2] - oboxes[:,0]
+        oboxes[:,3] = oboxes[:,3] - oboxes[:,1]
         dists = self.compute_dis(oboxes, hboxes, self.__dist_threshold)
         
         self.accumulator.update(oids, hids, dists, fid)
