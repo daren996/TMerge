@@ -6,9 +6,10 @@ to capture more information from detection results.
 import numpy as np
 from filterpy.kalman import KalmanFilter
 
-from videosys.ingestion.data import Tracklet
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
+
+from .data import Tracklet, tracklet_to_result
 
 def linear_assignment(cost_matrix):
     try:
@@ -246,5 +247,6 @@ class SORTOnlineTracker(Operator):
     
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]
-        tables[fields.DATA_OBJECT_TRACK] = self.tracker.update(detections)
+        tracklets = self.tracker.update(detections)
+        tables[fields.DATA_OBJECT_TRACK] = [tracklet_to_result(t) for t in tracklets]
         self.collector.emit(tables)

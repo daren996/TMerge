@@ -9,9 +9,9 @@ from collections import OrderedDict
 
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
-from videosys.ingestion.data import Tracklet
 
 from .utils import iou
+from .data import Tracklet, tracklet_to_result
 
 class IOUTracker:
     '''
@@ -91,7 +91,8 @@ class IOUOnlineTracker(Operator):
 
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]
-        tables[fields.DATA_OBJECT_TRACK] = self.tracker.update(detections)
+        tracklets = self.tracker.update(detections)
+        tables[fields.DATA_OBJECT_TRACK] = [tracklet_to_result(t) for t in tracklets]
         self.collector.emit(tables)
 
 
@@ -130,7 +131,8 @@ class IOUBatchTracker(Operator):
                 keep_set.add(uid)
         if self.__result_only:
             for frame_result in self.track_results:
-                self.collector.emit({fields.DATA_OBJECT_TRACK: [i for i in frame_result if i.uid in keep_set]})
+                self.collector.emit({fields.DATA_OBJECT_TRACK: 
+                [tracklet_to_result(i) for i in frame_result if i.uid in keep_set]})
         else:
             for tables, frame_result in zip(self.buffered_tables, self.track_results):
                 tables[fields.DATA_OBJECT_TRACK] = [i for i in frame_result if i.uid in keep_set]

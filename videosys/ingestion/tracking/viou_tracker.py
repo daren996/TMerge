@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from lapsolver import solve_dense
 
+from videosys.ingestion.data import ObjectTrackingResult
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
 from .lib.vis_tracker import VisTracker
@@ -27,6 +28,13 @@ class VIOUTracklet:
         if attr == 'bbox':
             return None if len(self.bboxes) == 0 else self.bboxes[-1]
         raise AttributeError()
+
+def viou_tracklet_to_result(tracklet):
+    if tracklet.payload is not None:
+        return ObjectTrackingResult(tracklet.uid, tracklet.label, tracklet.bbox, 
+            tracklet.payload.confidence, tracklet.payload)
+    else:
+        return ObjectTrackingResult(tracklet.uid, tracklet.label, tracklet.bbox, -1)
 
 def associate(tracks, detections, sigma_iou):
     """ perform association between tracks and detections in a frame.
@@ -232,7 +240,8 @@ class VIOUOnlineTracker(Operator):
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]
         detections = tables[fields.DATA_OBJECT_DETECTION]
-        tables[fields.DATA_OBJECT_TRACK] = self.tracker.update(frame, detections)
+        tracklets = self.tracker.update(frame, detections)
+        tables[fields.DATA_OBJECT_TRACK] = [viou_tracklet_to_result(t) for t in tracklets]
         self.collector.emit(tables)
     
 class VIOUBatchTracker(Operator):
@@ -269,6 +278,6 @@ class VIOUBatchTracker(Operator):
                 keep_set.add(uid)
         for idx, frame_result in enumerate(self.track_results):
             tables = self.buffered_tables[idx] if not self.__result_only else {}
-            tables[fields.DATA_OBJECT_TRACK] = [i for i in frame_result if i.uid in keep_set]
+            tables[fields.DATA_OBJECT_TRACK] = [viou_tracklet_to_result(i) for i in frame_result if i.uid in keep_set]
             self.collector.emit(tables)
             

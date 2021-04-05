@@ -4,7 +4,7 @@ import numpy as np
 
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
-from videosys.ingestion.data import ObjectDetectionResult, Tracklet
+from videosys.ingestion.data import ObjectDetectionResult, ObjectTrackingResult
 
 class MOTDetLoader(Operator):
     """
@@ -48,11 +48,11 @@ class MOTGTLoader(Operator):
                 frame_id = int(arr[0])
                 l, t, w, h = float(arr[2]), float(arr[3]), float(arr[4]), float(arr[5])
                 bbox = np.array([l, t, l+w, t +h])
-                self.frame_det_dict[frame_id].append(Tracklet(
+                self.frame_det_dict[frame_id].append(ObjectTrackingResult(
                     int(arr[1]),
                     -1,
-                    [bbox],
-                    -1, -1, -1,
+                    bbox,
+                    -1,
                     ObjectDetectionResult(bbox, -1, 1)
                 ))
 

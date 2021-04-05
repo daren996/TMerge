@@ -1,11 +1,11 @@
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
-from videosys.ingestion.data import Tracklet
 
 from .lib.deep_sort.tracker import Tracker
 from .lib.deep_sort.detection import Detection
 from .lib.deep_sort.generate_detections import create_box_encoder
 from .lib.deep_sort import nn_matching
+from .data import Tracklet
 
 def convert_boxes(boxes):
     returned_boxes = []

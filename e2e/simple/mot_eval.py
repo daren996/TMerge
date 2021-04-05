@@ -1,3 +1,4 @@
+from videosys.ingestion.tracking.mmtracking import MMTrackingMOT
 from videosys.ingestion.metrics.mot_metrics import MOTMetricsReporter
 from videosys.ingestion.io.loaders import MOTDetLoader, MOTGTLoader
 from videosys.ingestion.io.base import ImageSource, VideoSource
@@ -17,11 +18,16 @@ def run_mot(source_path, mot_det):
     builder.add_operator(MOTDetLoader({
         'folder_path': mot_det
     }))
+    builder.add_operator(MMTrackingMOT({
+        'config_file': 
+            '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
+        'checkpoint_file': ''
+    }))
     # builder.add_operator(VIOUOnlineTracker())
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(IOUBatchTracker())
     # builder.add_operator(SORTOnlineTracker())
-    builder.add_operator(DeepSORTOnlineTracker())
+    # builder.add_operator(DeepSORTOnlineTracker())
     builder.add_operator(MOTGTLoader({
         'folder_path': mot_det
     }))
@@ -38,5 +44,4 @@ def run_mot(source_path, mot_det):
 if __name__ == '__main__':
     dataset = '/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM'
     # dataset = '/media/ytchen/hdd/dataset/MOT17/train/MOT17-02-DPM'
-    run_mot('{}/img1'.format(dataset), 
-        dataset)
+    run_mot('{}/img1'.format(dataset), dataset)

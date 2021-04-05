@@ -23,3 +23,6 @@ pip install tensorflow-gpu==2.4.0
 pip install progress
 # for MOT metrics
 pip install motmetrics
+# for mmtracking
+pip install seaborn
+pip install mmcls

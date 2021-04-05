@@ -35,16 +35,10 @@ class ObjectDetectionResultWithFeature(ObjectDetectionResult):
 
 # ----------- for object tracking
 @dataclass
-class Tracklet:
+class ObjectTrackingResult:
     uid: int
-    start_frame: int
-    bboxes: list = field(default_factory=list)
-    max_score: float = 0
-    missing: int = 0
-    count: int = 0
-    payload: object = None
-
-    def __getattr__(self, attr):
-        if attr == 'bbox':
-            return None if len(self.bboxes) == 0 else self.bboxes[-1]
-        raise AttributeError()
+    label: int
+    bbox: list
+    confidence: float
+    payload: object = None # other data.
+    
