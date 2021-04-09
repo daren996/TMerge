@@ -28,8 +28,8 @@ def run_mot(source_path, mot_det):
     # builder.add_operator(VIOUOnlineTracker())
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(IOUBatchTracker())
-    builder.add_operator(SORTOnlineTracker())
-    # builder.add_operator(DeepSORTOnlineTracker())
+    # builder.add_operator(SORTOnlineTracker())
+    builder.add_operator(DeepSORTOnlineTracker())
     builder.add_operator(MOTGTLoader({
         'folder_path': mot_det
     }))
@@ -61,8 +61,8 @@ def save_mot(source_path, mot_det, mot_save_path):
     # builder.add_operator(VIOUOnlineTracker())
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(IOUBatchTracker())
-    builder.add_operator(SORTOnlineTracker())
-    # builder.add_operator(DeepSORTOnlineTracker())
+    # builder.add_operator(SORTOnlineTracker())
+    builder.add_operator(DeepSORTOnlineTracker())
     builder.add_operator(MOTGTLoader({
         'folder_path': mot_det
     }))
@@ -82,5 +82,5 @@ if __name__ == '__main__':
     sequence = 'MOT17-11-DPM'
     dataset = '/media/ytchen/hdd/dataset/MOT17/train/'+sequence
 
-    run_mot('{}/img1'.format(dataset), dataset)
-    # save_mot('{}/img1'.format(dataset), dataset, './output/{}.txt'.format(sequence))
+    # run_mot('{}/img1'.format(dataset), dataset)
+    save_mot('{}/img1'.format(dataset), dataset, './output/{}.txt'.format(sequence))

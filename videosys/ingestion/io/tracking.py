@@ -62,7 +62,8 @@ class MOTResultSink(AbstractTrackResultSink):
     def store(self, fid, track_results):
         with open(self.file_path, 'a+') as f:
             for t in track_results:
-                f.write(','.join([str(i) for i  in [fid, t.uid, t.bbox[0], t.bbox[1], 
+                f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}'
+                    .format(fid, t.uid, t.bbox[0], t.bbox[1], 
                     t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1], 
-                    1, -1, -1, -1]]))
+                    1, -1, -1, -1))
                 f.write('\n')

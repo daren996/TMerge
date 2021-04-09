@@ -1,17 +1,22 @@
+import numpy as np 
+
 from videosys.ingestion.data import ObjectTrackingResult
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
 
+from .lib.deep_sort import preprocessing
 from .lib.deep_sort.tracker import Tracker
 from .lib.deep_sort.detection import Detection
 from .lib.deep_sort.generate_detections import create_box_encoder
 from .lib.deep_sort import nn_matching
-from .data import Tracklet
 
 def convert_boxes(boxes):
+    """
+    convert to xywh
+    """
     returned_boxes = []
     for box in boxes:
-        box_xywh = [int(box[0]), int(box[1]), int(box[2]-box[0]), int(box[3]-box[1])]
+        box_xywh = [float(box[0]), float(box[1]), float(box[2]-box[0]), float(box[3]-box[1])]
         if box_xywh != [0,0,0,0]:
             returned_boxes.append(box_xywh)
     return returned_boxes
@@ -20,16 +25,16 @@ class DeepSORTOnlineTracker(Operator):
 
     def __init__(self, config=None):
         super().__init__(config=config)
-        self.__min_threshold = self._get_config('min_threshold', 0.3)
+        self.__min_threshold = self._get_config('min_threshold', 0)
 
     def prepare(self):
         model_filename = self._get_config('model','models/deep_sort/mars-small128.pb')
         self.encoder = create_box_encoder(model_filename, batch_size=1)
 
-        max_cosine_distance = 0.5
-        nn_budget = None
+        max_cosine_distance = 0.2
+        nn_budget = 100
         metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-
+        self.nms_max_overlap = 1
         self.tracker = Tracker(metric)
     
     def process(self, tables):
@@ -40,11 +45,23 @@ class DeepSORTOnlineTracker(Operator):
         converted_boxes = convert_boxes([det.bbox for det in detections])
 
         features = self.encoder(frame, converted_boxes)
-        dets_with_features = [Detection(bbox, det.confidence, feature, det) 
-            for det, feature, bbox in zip(detections, features, converted_boxes)]
+
+        indices = preprocessing.non_max_suppression(
+            np.array(converted_boxes), self.nms_max_overlap, 
+            np.array([d.confidence for d in detections]))
+
+        dets_with_features = [Detection(converted_boxes[i], detections[i].confidence, 
+            features[i], detections[i]) for i in indices]
+        
         # process.
         self.tracker.predict()
         self.tracker.update(dets_with_features)
-        tables[fields.DATA_OBJECT_TRACK] = [ObjectTrackingResult(i.track_id, i.payload.label, 
-            i.payload.bbox, i.payload.confidence, i.payload) for i in self.tracker.tracks]
+
+        confirmed = []
+        for track in self.tracker.tracks:
+            if not track.is_confirmed() or track.time_since_update > 1:
+                continue
+            confirmed.append(ObjectTrackingResult(track.track_id, track.payload.label, 
+                track.to_tlbr(), track.payload.confidence, track.payload))
+        tables[fields.DATA_OBJECT_TRACK] = confirmed
         self.collector.emit(tables)
