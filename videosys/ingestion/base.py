@@ -20,10 +20,10 @@ class Operator:
         self.collector = None
         self.context = None
     
-    def _get_config(self, key, default_value=None):
+    def _get_config(self, key, default_value=None, nullable=False):
         if key in self.config:
             return self.config[key]
-        if default_value is None:
+        if default_value is None and not nullable:
             raise LookupError('config "{}" is required'.format(key))
         return default_value
 

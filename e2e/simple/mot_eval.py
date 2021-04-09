@@ -20,7 +20,8 @@ def run_mot(source_path, mot_det):
     }))
     builder.add_operator(MMTrackingMOT({
         'config_file': 
-            '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
+            # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
+            '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-public.py',
         'checkpoint_file': ''
     }))
     # builder.add_operator(VIOUOnlineTracker())

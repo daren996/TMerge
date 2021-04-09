@@ -20,6 +20,9 @@ class ObjectDetectionVisualizer(Operator):
             self.__class_names = None
             logging.warning("warning: NO CLASSES given, will use label values")
 
+    def __extract_id(self, detect_result):
+        return detect_result.label
+
     def __extract_bbox(self, detect_result):
         return detect_result.bbox
 
@@ -34,6 +37,6 @@ class ObjectDetectionVisualizer(Operator):
         result = tables[fields.DATA_OBJECT_DETECTION]
         result = [r for r in result if r.confidence >= self.__threshold]
         image = draw_bbox_and_labels(frame, result, self.__extract_bbox, 
-            self.__generate_label)
+            self.__generate_label, id_func=self.__extract_id)
         cv2.imshow(self.window_name, image)
         cv2.waitKey(1000)

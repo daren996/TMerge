@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from mmdet.apis import init_detector, inference_detector
 
@@ -17,9 +19,17 @@ class MMDetObjectDetector(Operator):
         config_file = self._get_config('config_file')
         checkpoint_file = self._get_config('checkpoint_file')
         device = self._get_config('device', 'cuda:0')
+        self.detect_classes = self._get_config('classes', nullable=True)
         self.model = init_detector(config_file, checkpoint_file, device=device)
         self.context.put(fields.SHARED_MMDET_MODEL, self.model)
         self.context.put(fields.META_OBJECT_DETECTION_CLASSES, self.model.CLASSES)
+
+        if self.detect_classes is not None:
+            ignored_classes = [c for c in self.detect_classes if c not in self.model.CLASSES]
+            logging.warning("this model cannot detect class: %s", ignored_classes)
+
+            self.detect_classes = [self.model.CLASSES.index(c) for c in 
+                set(self.detect_classes) - set(ignored_classes)]
     
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]
@@ -42,6 +52,7 @@ class MMDetObjectDetector(Operator):
         # print('bbox:',bboxes[0], labels[0])
         obj_result = []
         for bbox, label in zip(bboxes, labels):
-            obj_result.append(ObjectDetectionResult(bbox[:-1], label, bbox[-1]))
+            if self.detect_classes is None or label in self.detect_classes:
+                obj_result.append(ObjectDetectionResult(bbox[:-1], label, bbox[-1]))
         tables[fields.DATA_OBJECT_DETECTION] = obj_result
         self.collector.emit(tables)

@@ -1,4 +1,8 @@
 from enum import Enum
+import random
+
+import seaborn as sns
+
 
 class Color(Enum):
     """An enum that defines common colors.
@@ -18,3 +22,11 @@ def color_val(color):
     if isinstance(color, str):
         return Color[color].value
     return None
+
+def rand_color(seed, cv2=True):
+    random.seed(seed)
+    colors = sns.color_palette()
+    color = random.choice(colors)
+    if cv2: 
+        return [int(255 * _c) for _c in color][::-1]
+    return color

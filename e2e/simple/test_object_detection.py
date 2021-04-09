@@ -38,6 +38,7 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     builder.add_operator(MMDetObjectDetector({
         'config_file': config_file,
         'checkpoint_file': checkpoint_file,
+        'classes': ['person']
     }))
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(VIOUOnlineTracker({

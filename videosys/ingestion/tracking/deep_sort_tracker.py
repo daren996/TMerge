@@ -1,3 +1,4 @@
+from videosys.ingestion.data import ObjectTrackingResult
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
 
@@ -44,6 +45,6 @@ class DeepSORTOnlineTracker(Operator):
         # process.
         self.tracker.predict()
         self.tracker.update(dets_with_features)
-        tables[fields.DATA_OBJECT_TRACK] = [Tracklet(i.track_id, -1, 
-            [i.payload.bbox], -1, -1, -1, i.payload) for i in self.tracker.tracks]
+        tables[fields.DATA_OBJECT_TRACK] = [ObjectTrackingResult(i.track_id, i.payload.label, 
+            i.payload.bbox, i.payload.confidence, i.payload) for i in self.tracker.tracks]
         self.collector.emit(tables)
