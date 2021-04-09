@@ -4,3 +4,4 @@
 result/
 data/
 models/
+**/output/

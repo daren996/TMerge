@@ -11,6 +11,7 @@ class ObjectTrackingVisualizer(Operator):
         self.window_name = 'track_vis'
         self.__visualize_track = self._get_config('visualize_track', True)
         self.__visualize_track_gt = self._get_config('visualize_track_gt', False)
+        self.visualize = self._get_config('visualize', True)
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):
@@ -49,5 +50,9 @@ class ObjectTrackingVisualizer(Operator):
             result = tables[fields.DATA_OBJECT_TRACK_GT]
             image = draw_bbox_and_labels(frame, result, self.__extract_bbox, 
                 lambda x: self.__generate_label(x, True), id_func=self.__extract_id)
-        cv2.imshow(self.window_name, image)
-        cv2.waitKey(100)
+        if self.visualize:
+            cv2.imshow(self.window_name, image)
+            cv2.waitKey(100)
+        else:
+            tables[fields.DATA_FRAME_TRACK] = image
+        self.collector.emit(tables)

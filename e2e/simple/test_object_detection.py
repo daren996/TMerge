@@ -5,8 +5,10 @@ from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 from videosys.ingestion.visualize.detection import ObjectDetectionVisualizer
 from videosys.ingestion.objectdetection.mmdet import MMDetObjectDetector
 from videosys.ingestion.base import SimplePipelineBuilder
-from videosys.ingestion.io.base import VideoSource
+from videosys.ingestion.io.base import ImageSink, VideoSink, VideoSource
 from videosys.ingestion.tracking.viou_tracker import VIOUOnlineTracker
+
+from videosys.ingestion import fields
 
 def detect_mmdet(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
@@ -46,7 +48,18 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     # }))
     # builder.add_operator(SORTOnlineTracker())
     builder.add_operator(DeepSORTOnlineTracker())
-    builder.add_operator(ObjectTrackingVisualizer())
+    builder.add_operator(ObjectTrackingVisualizer({
+        'visualize': False
+    }))
+    # builder.add_operator(ImageSink({
+    #     'path': './output/test1',
+    #     'image_key': fields.DATA_FRAME_TRACK
+    # }))
+    builder.add_operator(VideoSink({
+        'path': './output/test/',
+        'name': 'out',
+        'image_key': fields.DATA_FRAME_TRACK
+    }))
     builder.build().start()
 
 if __name__ == '__main__':
