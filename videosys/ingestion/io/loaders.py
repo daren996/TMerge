@@ -52,7 +52,7 @@ class MOTGTLoader(Operator):
                     int(arr[1]),
                     -1,
                     bbox,
-                    -1,
+                    float(arr[6]),
                     ObjectDetectionResult(bbox, -1, 1)
                 ))
 

@@ -1,3 +1,4 @@
+from videosys.ingestion.io.tracking import MOTResultSink
 from videosys.ingestion.tracking.mmtracking import MMTrackingMOT
 from videosys.ingestion.metrics.mot_metrics import MOTMetricsReporter
 from videosys.ingestion.io.loaders import MOTDetLoader, MOTGTLoader
@@ -18,16 +19,16 @@ def run_mot(source_path, mot_det):
     builder.add_operator(MOTDetLoader({
         'folder_path': mot_det
     }))
-    builder.add_operator(MMTrackingMOT({
-        'config_file': 
-            # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
-            '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-public.py',
-        'checkpoint_file': ''
-    }))
+    # builder.add_operator(MMTrackingMOT({
+    #     'config_file': 
+    #         # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
+    #         '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-public.py',
+    #     'checkpoint_file': ''
+    # }))
     # builder.add_operator(VIOUOnlineTracker())
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(IOUBatchTracker())
-    # builder.add_operator(SORTOnlineTracker())
+    builder.add_operator(SORTOnlineTracker())
     # builder.add_operator(DeepSORTOnlineTracker())
     builder.add_operator(MOTGTLoader({
         'folder_path': mot_det
@@ -42,7 +43,44 @@ def run_mot(source_path, mot_det):
     builder.add_operator(MOTMetricsReporter())
     builder.build().start()
 
+
+def save_mot(source_path, mot_det, mot_save_path):
+    print('detect from:', source_path)
+    builder = SimplePipelineBuilder()
+    # builder.add_operator(VideoSource({'file': video_path}))
+    builder.add_operator(ImageSource({'folder': source_path}))
+    builder.add_operator(MOTDetLoader({
+        'folder_path': mot_det
+    }))
+    # builder.add_operator(MMTrackingMOT({
+    #     'config_file': 
+    #         # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
+    #         '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-public.py',
+    #     'checkpoint_file': ''
+    # }))
+    # builder.add_operator(VIOUOnlineTracker())
+    # builder.add_operator(IOUOnlineTracker())
+    # builder.add_operator(IOUBatchTracker())
+    builder.add_operator(SORTOnlineTracker())
+    # builder.add_operator(DeepSORTOnlineTracker())
+    builder.add_operator(MOTGTLoader({
+        'folder_path': mot_det
+    }))
+    # builder.add_operator(ObjectDetectionVisualizer({
+    #     'threshold': 0
+    # }))
+    # builder.add_operator(ObjectTrackingVisualizer({
+    #     'visualize_track': False,
+    #     'visualize_track_gt': True
+    # }))
+    builder.add_operator(MOTResultSink({
+        'path': mot_save_path
+    }))
+    builder.build().start()
+
 if __name__ == '__main__':
-    dataset = '/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM'
-    # dataset = '/media/ytchen/hdd/dataset/MOT17/train/MOT17-02-DPM'
+    sequence = 'MOT17-11-DPM'
+    dataset = '/media/ytchen/hdd/dataset/MOT17/train/'+sequence
+
     run_mot('{}/img1'.format(dataset), dataset)
+    # save_mot('{}/img1'.format(dataset), dataset, './output/{}.txt'.format(sequence))

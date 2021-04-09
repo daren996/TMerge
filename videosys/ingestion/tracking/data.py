@@ -18,10 +18,11 @@ class Tracklet:
         raise AttributeError()
 
 
-def tracklet_to_result(tracklet):
+def tracklet_to_result(tracklet, updated_bbox=None):
+    bbox = tracklet.bbox if updated_bbox is None else updated_bbox
     if tracklet.payload is not None:
         return ObjectTrackingResult(tracklet.uid, tracklet.payload.label, 
-            tracklet.bbox, tracklet.payload.confidence, tracklet.payload)
+            bbox, tracklet.payload.confidence, tracklet.payload)
     else:
         return ObjectTrackingResult(tracklet.uid, -1, 
-            tracklet.bbox, -1)
+            bbox, -1)

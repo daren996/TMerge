@@ -189,11 +189,10 @@ class SORT:
     def update(self, detections):
         """
         Params:
-            dets - a numpy array of detections in the format 
-                [[x1,y1,x2,y2,score],[x1,y1,x2,y2,score],...]
-            Requires: this method must be called once for each frame even with empty detections 
-                (use np.empty((0, 5)) for frames without detections).
-            Returns the a similar array, where the last column is the object ID.
+            detections
+        
+        returns: 
+            list of tuples: [(tracklet, new_bbox)]
         NOTE: The number of objects returned may differ from the number of detections provided.
         """
         self.frame_count += 1
@@ -229,7 +228,7 @@ class SORT:
         for trk in reversed(self.trackers):
             if trk.time_since_update < 1 and \
                 trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits:
-                tracklet_in_frame.append(trk.tracklet)
+                tracklet_in_frame.append((trk.tracklet, trk.get_state()[0]))
                 # +1 as MOT benchmark requires positive
             i -= 1
             # remove dead tracklet
@@ -240,7 +239,7 @@ class SORT:
 class SORTOnlineTracker(Operator):
     def prepare(self):
         self.tracker = SORT(
-            max_age = self._get_config('max_age', 30),
+            max_age = self._get_config('max_age', 1),
             min_hits = self._get_config('min_hits', 3),
             iou_threshold= self._get_config('iou_threshold', 0.3)
         )
@@ -248,5 +247,5 @@ class SORTOnlineTracker(Operator):
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]
         tracklets = self.tracker.update(detections)
-        tables[fields.DATA_OBJECT_TRACK] = [tracklet_to_result(t) for t in tracklets]
+        tables[fields.DATA_OBJECT_TRACK] = [tracklet_to_result(t[0], t[1]) for t in tracklets]
         self.collector.emit(tables)

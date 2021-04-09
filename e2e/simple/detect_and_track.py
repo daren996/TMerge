@@ -23,7 +23,6 @@ def detect_and_track(video_path, config_file, checkpoint_file, result_folder):
     }))
     builder.build().start()
 
-
 if __name__ == '__main__':
     detect_and_track(
         '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',

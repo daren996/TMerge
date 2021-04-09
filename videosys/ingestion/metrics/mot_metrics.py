@@ -21,16 +21,19 @@ class MOTMetricsReporter(Operator):
         fid = tables[fields.DATA_FRAME_ID]
         track_result = tables[fields.DATA_OBJECT_TRACK]
         track_gt = tables[fields.DATA_OBJECT_TRACK_GT]
+        track_gt = [t for t in track_gt if t.confidence >= 1]
         hids = np.array([i.uid for i in track_result])
-        oids = np.array([i.uid for i in track_gt])
         hboxes = np.array([i.bbox for i in track_result])
+        oids = np.array([i.uid for i in track_gt])
         oboxes = np.array([i.bbox for i in track_gt])
         # transform to x,y, w,h
         hboxes[:,2] = hboxes[:,2] - hboxes[:,0]
         hboxes[:,3] = hboxes[:,3] - hboxes[:,1]
         oboxes[:,2] = oboxes[:,2] - oboxes[:,0]
         oboxes[:,3] = oboxes[:,3] - oboxes[:,1]
-        dists = self.compute_dis(oboxes, hboxes, self.__dist_threshold)
+        dists = np.empty((0, 0))
+        if len(hids) > 0 and len(oids) > 0:
+            dists = self.compute_dis(oboxes, hboxes, self.__dist_threshold)
         
         self.accumulator.update(oids, hids, dists, fid)
 
