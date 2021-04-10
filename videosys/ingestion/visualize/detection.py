@@ -12,7 +12,7 @@ class ObjectDetectionVisualizer(Operator):
         super().__init__(config=config)
         self.window_name = 'detect_vis'
         self.__threshold = self._get_config('threshold', 0.3)
-        self.visualize = self._get_config('visualize', True)
+        self.display = self._get_config('display', True)
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):
@@ -39,7 +39,7 @@ class ObjectDetectionVisualizer(Operator):
         result = [r for r in result if r.confidence >= self.__threshold]
         image = draw_bbox_and_labels(frame, result, self.__extract_bbox, 
             self.__generate_label, id_func=self.__extract_id)
-        if self.visualize:
+        if self.display:
             cv2.imshow(self.window_name, image)
             cv2.waitKey(1000)
         else:

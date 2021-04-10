@@ -26,3 +26,6 @@ pip install motmetrics
 # for mmtracking
 pip install seaborn
 pip install mmcls
+# for CenterTrack
+pip install numba
+pip install pyquaternion

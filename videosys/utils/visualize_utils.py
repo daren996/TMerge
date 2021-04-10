@@ -30,7 +30,8 @@ def add_text_to_image(image, txt, line_height=40, copy_image=True, font_color = 
 
 def draw_bbox_and_labels(image, objs, bbox_func, label_func, \
     copy_image = True, id_func=None, bbox_color=None, label_color=None, thickness=1, \
-        font = cv2.FONT_HERSHEY_SIMPLEX, font_scale=0.5, label_reverse_bg=False):
+        font = cv2.FONT_HERSHEY_SIMPLEX, font_scale=0.5, font_thickness=1,
+        label_reverse_bg=False):
     bbox_color = color_val(bbox_color) if bbox_color else None
     label_color = color_val(label_color) if label_color else None
     if copy_image:
@@ -52,6 +53,6 @@ def draw_bbox_and_labels(image, objs, bbox_func, label_func, \
             if label_reverse_bg:
                 image[y1:y1 + text_height, x1:x1 + width, :] = label_color
             cv2.putText(image, label, (x1, y1 + text_height -2), font, font_scale, 
-                (0,0,0) if label_reverse_bg else label_color)
+                (0,0,0) if label_reverse_bg else label_color, thickness=font_thickness)
             y1 += text_height
     return image

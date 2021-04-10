@@ -1,2 +1,2 @@
 CURRENT_FOLDER=$(pwd)
-export PYTHONPATH=$CURRENT_FOLDER:$CURRENT_FOLDER/../mmdetection/:$CURRENT_FOLDER/../CenterNet/src/:$CURRENT_FOLDER/../mmtracking/:
+export PYTHONPATH=$CURRENT_FOLDER:$CURRENT_FOLDER/../mmdetection/:$CURRENT_FOLDER/../CenterNet/src/:$CURRENT_FOLDER/../mmtracking/:$CURRENT_FOLDER/../CenterTrack/src/:
