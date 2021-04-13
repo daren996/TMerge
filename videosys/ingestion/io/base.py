@@ -70,7 +70,7 @@ class VideoSink(Operator):
             os.makedirs(self.path)
         if self.context.has(fields.META_VIDEO):
             video_meta = self.context.get(fields.META_VIDEO)
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
             self.out = cv2.VideoWriter(self.file_name, fourcc, video_meta.fps, 
                 (int(video_meta.width), int(video_meta.height)))
             
@@ -80,7 +80,7 @@ class VideoSink(Operator):
         image = tables[self.image_key]
         if self.out is None:
             # init
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
             self.out = cv2.VideoWriter(self.file_name, fourcc, 25.0,
                  (int(image.shape[0]),int(image.shape[1])))
         self.out.write(image)

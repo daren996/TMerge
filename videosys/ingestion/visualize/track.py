@@ -11,7 +11,7 @@ class ObjectTrackingVisualizer(Operator):
         self.window_name = 'track_vis'
         self.__visualize_track = self._get_config('visualize_track', True)
         self.__visualize_track_gt = self._get_config('visualize_track_gt', False)
-        self.display = self._get_config('visualize', True)
+        self.display = self._get_config('display', True)
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):

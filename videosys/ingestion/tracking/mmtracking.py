@@ -1,5 +1,10 @@
 from mmtrack.apis import inference_mot, init_model
-from mmtrack.core import restore_result
+from mmtrack.core import restore_result, track2result
+from mmtrack.models.mot import DeepSORT
+from mmtrack.models.mot.trackers.sort_tracker import SortTracker
+from mmtrack.models.motion.kalman_filter import KalmanFilter
+
+import torch
 
 from videosys.ingestion.data import ObjectTrackingResult
 from videosys.ingestion.base import Operator
@@ -27,3 +32,41 @@ class MMTrackingMOT(Operator):
             # print(result[-1])
         tables[fields.DATA_OBJECT_TRACK] = result
         self.collector.emit(tables)
+
+class MMTrackingSORT(Operator):
+    """
+    use the SORT algorithm implemented in mm-tracking lib.
+    """
+    
+    def prepare(self):
+        self.model = DeepSORT(
+            motion=dict(type='KalmanFilter', center_only=False),
+            tracker=dict(type='SortTracker', obj_score_thr=0.5, match_iou_thr=0.5, reid=None)
+        )
+        self.tracker = self.model.tracker
+
+    def process(self, tables):
+        num_classes = len(self.context.get(fields.META_OBJECT_DETECTION_CLASSES))
+        frame = tables[fields.DATA_FRAME]
+        fid = tables[fields.DATA_FRAME_ID]
+        detections = tables[fields.DATA_OBJECT_DETECTION]
+        img_metas = dict()
+
+        bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections])
+        labels_tensor = torch.tensor([d.label for d in detections])
+        
+        # convert tensor results to np.array
+        bboxes, labels, ids = self.tracker.track(frame, img_metas, 
+            self.model, bboxes_tensor, labels_tensor, fid)
+        tracking_result = track2result(bboxes, labels, ids, num_classes)
+        bboxes, labels, ids = restore_result(tracking_result, return_ids=True)
+        
+        result = []
+        for bbox, label, uid in zip(bboxes, labels, ids):
+            result.append(ObjectTrackingResult(uid, label, bbox[:4], bbox[4]))
+            # print(result[-1])
+        tables[fields.DATA_OBJECT_TRACK] = result
+        self.collector.emit(tables)
+        
+        
+
