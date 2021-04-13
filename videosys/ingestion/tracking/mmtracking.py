@@ -1,8 +1,6 @@
 from mmtrack.apis import inference_mot, init_model
 from mmtrack.core import restore_result, track2result
 from mmtrack.models.mot import DeepSORT
-from mmtrack.models.mot.trackers.sort_tracker import SortTracker
-from mmtrack.models.motion.kalman_filter import KalmanFilter
 
 import torch
 
@@ -12,13 +10,13 @@ from videosys.ingestion import fields
 
 class MMTrackingMOT(Operator):
 
+    def __init__(self, config_file, device='cuda:0'):
+        self.config_file = config_file
+        self.device = device
+        super().__init__()
+
     def prepare(self):
-        config_file = self._get_config('config_file')
-        # checkpoint_file = self._get_config('checkpoint_file')
-        checkpoint_file = None
-        device = self._get_config('device', 'cuda:0')
-        self.model = init_model(config_file, 
-            checkpoint_file, device)
+        self.model = init_model(self.config_file, None, self.device)
 
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]

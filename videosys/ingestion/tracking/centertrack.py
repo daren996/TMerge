@@ -16,7 +16,7 @@ class CenterTrackTracking(Operator):
             ]
         ))
         self.context.put(fields.META_OBJECT_DETECTION_CLASSES,
-         self.tracker.debugger.names)
+            self.tracker.debugger.names)
     
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]

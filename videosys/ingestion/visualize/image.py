@@ -5,10 +5,10 @@ from videosys.ingestion import fields
 from videosys.ingestion.base import Operator
 
 class ImageVisualizer(Operator):
-    def __init__(self, config):
-        super().__init__(config=config)
-        self.__auto_play = self._get_config('auto_play', True)
-        self.window_name='img_vis'
+    def __init__(self, auto_play=True, window_name='img_vis'):
+        super().__init__()
+        self.__auto_play = auto_play
+        self.window_name=window_name
 
     def prepare(self):
         self.__fps = self.context.get(fields.META_VIDEO).fps \

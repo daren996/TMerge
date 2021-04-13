@@ -8,11 +8,11 @@ from videosys.utils.visualize_utils import draw_bbox_and_labels
 
 
 class ObjectDetectionVisualizer(Operator):
-    def __init__(self, config=None):
-        super().__init__(config=config)
-        self.window_name = 'detect_vis'
-        self.__threshold = self._get_config('threshold', 0.3)
-        self.display = self._get_config('display', True)
+    def __init__(self, window_name='detect_vis', threshold=0.3, display=True):
+        super().__init__()
+        self.window_name = window_name
+        self.__threshold = threshold
+        self.display = display
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):

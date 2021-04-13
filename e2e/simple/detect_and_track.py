@@ -8,19 +8,10 @@ from videosys.ingestion.io.tracking import TrackResultFolderSink
 def detect_and_track(video_path, config_file, checkpoint_file, result_folder):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
-    builder.add_operator(VideoSource({'file': video_path}))
-    builder.add_operator(MMDetObjectDetector({
-        'config_file': config_file,
-        'checkpoint_file': checkpoint_file,
-    }))
-    builder.add_operator(IOUOnlineTracker({
-        'ttl': -1,
-        'iou_threshold': 0.5,
-        'min_conf': 0.4
-    }))
-    builder.add_operator(TrackResultFolderSink({
-        'output_folder': result_folder
-    }))
+    builder.add_operator(VideoSource(video_path))
+    builder.add_operator(MMDetObjectDetector(config_file,checkpoint_file))
+    builder.add_operator(IOUOnlineTracker(ttl=-1, iou_threshold= 0.5, min_conf= 0.4))
+    builder.add_operator(TrackResultFolderSink(result_folder))
     builder.build().start()
 
 if __name__ == '__main__':

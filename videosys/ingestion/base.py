@@ -11,21 +11,13 @@ class Collector:
             operator.process(tables)
 
 class Operator:
-    def __init__(self, config=None):
+    def __init__(self):
         '''
         Params:
         config: configuration for this operator.
         '''
-        self.config = {} if config is None else config
         self.collector = None
         self.context = None
-    
-    def _get_config(self, key, default_value=None, nullable=False):
-        if key in self.config:
-            return self.config[key]
-        if default_value is None and not nullable:
-            raise LookupError('config "{}" is required'.format(key))
-        return default_value
 
     def setup(self, context=None, collector=None, controller=None):
         '''

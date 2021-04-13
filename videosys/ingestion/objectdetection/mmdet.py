@@ -14,12 +14,18 @@ class MMDetObjectDetector(Operator):
     supported models can be found at
         https://mmdetection.readthedocs.io/en/latest/modelzoo_statistics.html
     '''
-    
+    def __init__(self, config_file, checkpoint_file, device='cuda:0', 
+            detect_classes=None):
+        self.config_file = config_file
+        self.checkpoint_file = checkpoint_file
+        self.device = device
+        self.detect_classes = detect_classes
+        super().__init__()
+
     def prepare(self):
-        config_file = self._get_config('config_file')
-        checkpoint_file = self._get_config('checkpoint_file')
-        device = self._get_config('device', 'cuda:0')
-        self.detect_classes = self._get_config('classes', nullable=True)
+        config_file = self.config_file
+        checkpoint_file = self.checkpoint_file
+        device = self.device
         self.model = init_detector(config_file, checkpoint_file, device=device)
         self.context.put(fields.SHARED_MMDET_MODEL, self.model)
         self.context.put(fields.META_OBJECT_DETECTION_CLASSES, self.model.CLASSES)

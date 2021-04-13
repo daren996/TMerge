@@ -11,8 +11,12 @@ from videosys.ingestion.base import Source, Operator
 # ============ source operators
 class VideoSource(Source):
 
+    def __init__(self, file):
+        self.file = file
+        super(VideoSource, self).__init__()
+
     def prepare(self):
-        video = cv2.VideoCapture(self.config['file'])
+        video = cv2.VideoCapture(self.file)
         # parse metadata
         fps = video.get(cv2.CAP_PROP_FPS)
         width  = video.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -43,10 +47,14 @@ class VideoSource(Source):
         self.__video.release()
 
 class ImageSource(Source):
+    def __init__(self, folder):
+        self.folder = folder
+        super(ImageSource, self).__init__()
+
     def prepare(self):
         # read images.
         images = []
-        for root, _, files in os.walk(self._get_config('folder')):
+        for root, _, files in os.walk(self.folder):
             for file in files:
                 images.append((os.path.join(root, file), int(file[:file.index('.')])))
         self.images = images
@@ -73,10 +81,13 @@ class ImageSource(Source):
 # =============== sink operators
     
 class VideoSink(Operator):
+    def __init__(self, path, name, image_key = fields.DATA_FRAME):
+        self.path = path
+        self.name = name
+        self.image_key = image_key
+        super().__init__()
+
     def prepare(self):
-        self.path = self._get_config('path')
-        self.name = self._get_config('name')
-        self.image_key = self._get_config('image_key', fields.DATA_FRAME)
         self.file_name = os.path.join(self.path, '{}.mp4'.format(self.name))
         self.out = None
         if not os.path.exists(self.path):
@@ -102,9 +113,12 @@ class VideoSink(Operator):
         self.out.release()
 
 class ImageSink(Operator):
+    def __init__(self, path, image_key = fields.DATA_FRAME):
+        self.path = path
+        self.image_key = fields.DATA_FRAME
+        super().__init__()
+
     def prepare(self):
-        self.path = self._get_config('path')
-        self.image_key = self._get_config('image_key', fields.DATA_FRAME)
         # create folder.
         if not os.path.exists(self.path):
             os.makedirs(self.path)

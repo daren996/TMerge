@@ -36,12 +36,8 @@ class MMLibMoveData(Operator):
 
 class MMMultiScaleFlipAug(Operator):
 
-    def prepare(self):
-        transforms = self._get_config('transforms')
-        img_scale = self._get_config('img_scale', nullable=True)
-        scale_factor = self._get_config('scale_factor', nullable=True)
-        flip = self._get_config('flip', False)
-        flip_direction = self._get_config('flip_direction', 'horizontal')
+    def __init__(self, transforms, img_scale=None, scale_factor = None, flip=False, 
+            flip_direction='horizontal'):
         self.aug = MultiScaleFlipAug(transforms, img_scale, scale_factor, flip, flip_direction)
     
     def process(self, tables):

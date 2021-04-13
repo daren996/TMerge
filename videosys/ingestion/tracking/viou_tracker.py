@@ -228,14 +228,15 @@ class VIOUTracker:
         return tracks_active
 
 class VIOUOnlineTracker(Operator):
-    def prepare(self):
+    def __init__(self, min_conf = 0.4, iou_threshold=0.5, w=1, tracker='NONE', kuh_ratio=1.0):
         self.tracker = VIOUTracker(
-            min_det_confidence = self._get_config('min_conf', 0.4), 
-            iou_threshold = self._get_config('iou_threshold', 0.5),
-            window_size = self._get_config('w', 1), 
-            tracker_type= self._get_config('tracker', 'NONE'),  
-            keep_upper_height_ratio= self._get_config('kuh_ratio', 1.0) 
+            min_det_confidence = min_conf, 
+            iou_threshold = iou_threshold,
+            window_size = w, 
+            tracker_type= tracker,  
+            keep_upper_height_ratio= kuh_ratio 
         )
+        super().__init__()
 
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]
@@ -245,20 +246,22 @@ class VIOUOnlineTracker(Operator):
         self.collector.emit(tables)
     
 class VIOUBatchTracker(Operator):
-    def prepare(self):
-        self.__max_det_confidence = self._get_config('max_conf', 0.5)
-        self.__t_min = self._get_config('t_min', 4)
-        self.__result_only = self._get_config('result_only', True)
+    def __init__(self, max_conf=0.5, t_min=4, result_only=True, min_conf=0.4, 
+            iou_threshold=0.5, w=1, tracker='NONE', kuh_ratio=1.0):
+        self.__max_det_confidence = max_conf
+        self.__t_min = t_min
+        self.__result_only = result_only
         self.tracker =  VIOUTracker(
-            min_det_confidence = self._get_config('min_conf', 0.4), 
-            iou_threshold = self._get_config('iou_threshold', 0.5),
-            window_size = self._get_config('w', 1), 
-            tracker_type= self._get_config('tracker', 'NONE'),  
-            keep_upper_height_ratio= self._get_config('kuh_ratio', 1.0) 
+            min_det_confidence = min_conf, 
+            iou_threshold = iou_threshold,
+            window_size = w, 
+            tracker_type= tracker,  
+            keep_upper_height_ratio= kuh_ratio 
         )
         self.max_tracklets = OrderedDict()
         self.track_results = []
         self.buffered_tables = []
+        super().__init__()
     
     def process(self, tables):
         frame = tables[fields.DATA_FRAME]

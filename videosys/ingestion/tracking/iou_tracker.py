@@ -82,12 +82,13 @@ class IOUTracker:
 
 class IOUOnlineTracker(Operator):
 
-    def prepare(self):
+    def __init__(self, ttl=-1, iou_threshold=0.5, min_conf=0.4):
         self.tracker = IOUTracker(
-            ttl = self._get_config('ttl', -1),
-            iou_threshold= self._get_config('iou_threshold', 0.5),
-            min_detection_confidence= self._get_config('min_conf', 0.4)
+            ttl = ttl,
+            iou_threshold= iou_threshold,
+            min_detection_confidence= min_conf
         )
+        super().__init__()
 
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]
@@ -98,20 +99,22 @@ class IOUOnlineTracker(Operator):
 
 class IOUBatchTracker(Operator):
 
-    def prepare(self):
-        self.__ttl = self._get_config('ttl', -1)
-        self.__result_only = self._get_config('result_only', False)
-        self.__max_detection_confidence = self._get_config('max_conf', 0.5)
+    def __init__(self, ttl, result_only=False, min_conf=0.4, 
+            max_conf = 0.5, t_min=5, iou_threshold=0.5):
+        self.__ttl = ttl
+        self.__result_only = result_only
+        self.__max_detection_confidence = max_conf
         # at least how many frames an object should appear
-        self.__t_min = self._get_config('t_min', 5)
+        self.__t_min = t_min
         self.tracker = IOUTracker(
             ttl = self.__ttl,
-            iou_threshold= self._get_config('iou_threshold', 0.5),
-            min_detection_confidence= self._get_config('min_conf', 0.4)
+            iou_threshold= iou_threshold,
+            min_detection_confidence= min_conf
         )
         self.max_tracklets = OrderedDict()
         self.track_results = []
         self.buffered_tables = []
+        super().__init__()
     
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]

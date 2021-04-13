@@ -10,9 +10,11 @@ class MOTDetLoader(Operator):
     """
     load det.txt provided by MOT datasets
     """
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
+        super().__init__()
 
     def prepare(self):
-        self.folder_path = self._get_config('folder_path')
         self.frame_det_dict = defaultdict(list)
         with open('{}/det/det.txt'.format(self.folder_path)) as f:
             for line in f.readlines():
@@ -38,9 +40,11 @@ class MOTGTLoader(Operator):
     
     data will be put into fields.DATA_OBJECT_TRACK_GT
     """
+    def __init__(self, folder_path):
+        self.folder_path = folder_path
+        super().__init__()
 
     def prepare(self):
-        self.folder_path = self._get_config('folder_path')
         self.frame_det_dict = defaultdict(list)
         with open('{}/gt/gt.txt'.format(self.folder_path)) as f:
             for line in f.readlines():

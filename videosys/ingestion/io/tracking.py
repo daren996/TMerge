@@ -6,9 +6,9 @@ from videosys.ingestion import fields
 
 class AbstractTrackResultSink(Operator):
 
-    def __init__(self, config):
-        super().__init__(config=config)
-        self.__save_at_end = self._get_config('save_at_end', False)
+    def __init__(self, save_at_end = False):
+        super().__init__()
+        self.__save_at_end = save_at_end
         self.__buffers = []
     
     def store(self, fid, track_results):
@@ -31,8 +31,12 @@ class AbstractTrackResultSink(Operator):
                 self.store(fid, track_results)
 
 class TrackResultFolderSink(AbstractTrackResultSink):
+    def __init__(self, output_folder, **kwargs):
+        self.output_folder = output_folder
+        super().__init__(**kwargs)
+
     def prepare(self):
-        file_path = self._get_config('output_folder')
+        file_path = self.output_folder
         # create if not exist
         if not os.path.exists(file_path): 
             os.makedirs(file_path)
@@ -49,8 +53,12 @@ class TrackResultFolderSink(AbstractTrackResultSink):
 
 
 class MOTResultSink(AbstractTrackResultSink):
+    def __init__(self, path, **kwargs):
+        self.output_path = path
+        super().__init__(**kwargs)
+
     def prepare(self):
-        file_path = self._get_config('path')
+        file_path = self.output_path
         parent = os.path.dirname(file_path)
         if not os.path.exists(parent):
             os.makedirs(parent)

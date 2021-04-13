@@ -23,13 +23,13 @@ def convert_boxes(boxes):
 
 class DeepSORTOnlineTracker(Operator):
 
-    def __init__(self, config=None):
-        super().__init__(config=config)
-        self.__min_threshold = self._get_config('min_threshold', 0)
+    def __init__(self, min_threshold=0, model='models/deep_sort/mars-small128.pb'):
+        self.__min_threshold = min_threshold
+        self.model_filename = model
+        super().__init__()
 
     def prepare(self):
-        model_filename = self._get_config('model','models/deep_sort/mars-small128.pb')
-        self.encoder = create_box_encoder(model_filename, batch_size=1)
+        self.encoder = create_box_encoder(self.model_filename, batch_size=1)
 
         max_cosine_distance = 0.2
         nn_budget = 100

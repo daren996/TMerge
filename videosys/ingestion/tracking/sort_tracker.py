@@ -237,12 +237,13 @@ class SORT:
         return tracklet_in_frame
 
 class SORTOnlineTracker(Operator):
-    def prepare(self):
+    def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3):
         self.tracker = SORT(
-            max_age = self._get_config('max_age', 1),
-            min_hits = self._get_config('min_hits', 3),
-            iou_threshold= self._get_config('iou_threshold', 0.3)
+            max_age = max_age,
+            min_hits = min_hits,
+            iou_threshold= iou_threshold
         )
+        super().__init__()
     
     def process(self, tables):
         detections = tables[fields.DATA_OBJECT_DETECTION]

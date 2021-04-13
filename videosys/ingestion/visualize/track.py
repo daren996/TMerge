@@ -6,12 +6,13 @@ from videosys.ingestion.base import Operator
 from videosys.utils.visualize_utils import draw_bbox_and_labels
 
 class ObjectTrackingVisualizer(Operator):
-    def __init__(self, config=None):
-        super().__init__(config=config)
-        self.window_name = 'track_vis'
-        self.__visualize_track = self._get_config('visualize_track', True)
-        self.__visualize_track_gt = self._get_config('visualize_track_gt', False)
-        self.display = self._get_config('display', True)
+    def __init__(self, window_name='track_vis', visualize_track=True, 
+            visualize_track_gt=False, display=True):
+        super().__init__()
+        self.window_name = window_name
+        self.__visualize_track = visualize_track
+        self.__visualize_track_gt = visualize_track_gt
+        self.display = display
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):

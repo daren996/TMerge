@@ -14,11 +14,9 @@ from videosys.ingestion.tracking.deep_sort_tracker import DeepSORTOnlineTracker
 def run_mot(source_path, mot_det):
     print('detect from:', source_path)
     builder = SimplePipelineBuilder()
-    # builder.add_operator(VideoSource({'file': video_path}))
-    builder.add_operator(ImageSource({'folder': source_path}))
-    builder.add_operator(MOTDetLoader({
-        'folder_path': mot_det
-    }))
+    # builder.add_operator(VideoSource(video_path))
+    builder.add_operator(ImageSource(source_path))
+    builder.add_operator(MOTDetLoader(mot_det))
     # builder.add_operator(MMTrackingMOT({
     #     'config_file': 
     #         # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
@@ -30,9 +28,7 @@ def run_mot(source_path, mot_det):
     # builder.add_operator(IOUBatchTracker())
     # builder.add_operator(SORTOnlineTracker())
     builder.add_operator(DeepSORTOnlineTracker())
-    builder.add_operator(MOTGTLoader({
-        'folder_path': mot_det
-    }))
+    builder.add_operator(MOTGTLoader(mot_det))
     # builder.add_operator(ObjectDetectionVisualizer({
     #     'threshold': 0
     # }))
@@ -47,11 +43,9 @@ def run_mot(source_path, mot_det):
 def save_mot(source_path, mot_det, mot_save_path):
     print('detect from:', source_path)
     builder = SimplePipelineBuilder()
-    # builder.add_operator(VideoSource({'file': video_path}))
-    builder.add_operator(ImageSource({'folder': source_path}))
-    builder.add_operator(MOTDetLoader({
-        'folder_path': mot_det
-    }))
+    # builder.add_operator(VideoSource(video_path))
+    builder.add_operator(ImageSource(source_path))
+    builder.add_operator(MOTDetLoader(mot_det))
     # builder.add_operator(MMTrackingMOT({
     #     'config_file': 
     #         # '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
@@ -63,9 +57,7 @@ def save_mot(source_path, mot_det, mot_save_path):
     # builder.add_operator(IOUBatchTracker())
     # builder.add_operator(SORTOnlineTracker())
     builder.add_operator(DeepSORTOnlineTracker())
-    builder.add_operator(MOTGTLoader({
-        'folder_path': mot_det
-    }))
+    builder.add_operator(MOTGTLoader(mot_det))
     # builder.add_operator(ObjectDetectionVisualizer({
     #     'threshold': 0
     # }))
@@ -73,9 +65,7 @@ def save_mot(source_path, mot_det, mot_save_path):
     #     'visualize_track': False,
     #     'visualize_track_gt': True
     # }))
-    builder.add_operator(MOTResultSink({
-        'path': mot_save_path
-    }))
+    builder.add_operator(MOTResultSink(mot_save_path))
     builder.build().start()
 
 if __name__ == '__main__':

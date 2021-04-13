@@ -16,11 +16,8 @@ from videosys.ingestion import fields
 def detect_mmdet(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
-    builder.add_operator(VideoSource({'file': video_path}))
-    builder.add_operator(MMDetObjectDetector({
-        'config_file': config_file,
-        'checkpoint_file': checkpoint_file,
-    }))
+    builder.add_operator(VideoSource(video_path))
+    builder.add_operator(MMDetObjectDetector(config_file,checkpoint_file))
     builder.add_operator(ObjectDetectionVisualizer({
         'threshold': 0.3
     }))
@@ -29,23 +26,19 @@ def detect_mmdet(video_path, config_file, checkpoint_file):
 def detect_centernet(video_path):
     print('detect_video:', video_path)
     builder = SimplePipelineBuilder()
-    builder.add_operator(VideoSource({'file': video_path}))
+    builder.add_operator(VideoSource(video_path))
     builder.add_operator(CenterNetObjectDetector())
-    builder.add_operator(ObjectDetectionVisualizer({
-        'threshold': 0.3
-    }))
+    builder.add_operator(ObjectDetectionVisualizer(threshold= 0.3))
     builder.build().start()
 
 def detect_mmdet_track(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
-    builder.add_operator(VideoSource({'file': video_path}))
+    builder.add_operator(VideoSource(video_path))
     builder.add_operator(MMLibCompatable())
-    builder.add_operator(MMDetObjectDetector({
-        'config_file': config_file,
-        'checkpoint_file': checkpoint_file,
+    builder.add_operator(MMDetObjectDetector(config_file, checkpoint_file,
         # 'classes': ['person']
-    }))
+    ))
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(VIOUOnlineTracker({
     #     'tracker': 'MIL'
@@ -55,8 +48,8 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     # builder.add_operator(MMTrackingSORT())
     img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-    builder.add_operator(MMMultiScaleFlipAug({
-        'transforms': [
+    builder.add_operator(MMMultiScaleFlipAug(
+        [
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
@@ -64,14 +57,12 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
             dict(type='ImageToTensor', keys=['img']),
             dict(type='VideoCollect', keys=['img'])
         ],
-        'img_scale': (1088, 1088),
-        'flip': False,
-    }))
+        img_scale=(1088, 1088),
+        flip=False,
+    ))
     builder.add_operator(MMLibMoveData())
     builder.add_operator(MMTrackingDeepSORT())
-    builder.add_operator(ObjectTrackingVisualizer({
-        'display': True
-    }))
+    builder.add_operator(ObjectTrackingVisualizer(display= True))
     # builder.add_operator(ImageSink({
     #     'path': './output/test1',
     #     'image_key': fields.DATA_FRAME_TRACK
@@ -87,21 +78,19 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
 def detect_centertrack(video_path):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
-    builder.add_operator(VideoSource({'file': video_path}))
-    builder.add_operator(CenterTrackTracking({
+    builder.add_operator(VideoSource(video_path))
+    builder.add_operator(CenterTrackTracking(
         # 'config_file': config_file,
         # 'checkpoint_file': checkpoint_file,
         # 'classes': ['person']
-    }))
+    ))
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(VIOUOnlineTracker({
     #     'tracker': 'MIL'
     # }))
     # builder.add_operator(SORTOnlineTracker())
     # builder.add_operator(DeepSORTOnlineTracker())
-    builder.add_operator(ObjectTrackingVisualizer({
-        'display': True
-    }))
+    builder.add_operator(ObjectTrackingVisualizer(display=True))
     # builder.add_operator(ImageSink({
     #     'path': './output/test1',
     #     'image_key': fields.DATA_FRAME_TRACK
@@ -121,17 +110,17 @@ if __name__ == '__main__':
     #     '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
     # )
 
-    detect_mmdet_track(
-        '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
-        '../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
-        # pylint: disable=line-too-long
-        '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
-    )
+    # detect_mmdet_track(
+    #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    #     '../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
+    #     # pylint: disable=line-too-long
+    #     '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
+    # )
 
     # detect_centernet(
     #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'
     # )
     
-    # detect_centertrack(
-    #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'
-    # )
+    detect_centertrack(
+        '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'
+    )
