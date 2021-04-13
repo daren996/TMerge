@@ -26,7 +26,8 @@ class MMDetObjectDetector(Operator):
 
         if self.detect_classes is not None:
             ignored_classes = [c for c in self.detect_classes if c not in self.model.CLASSES]
-            logging.warning("this model cannot detect class: %s", ignored_classes)
+            if len(ignored_classes) > 0:
+                logging.warning("this model cannot detect class: %s", ignored_classes)
 
             self.detect_classes = [self.model.CLASSES.index(c) for c in 
                 set(self.detect_classes) - set(ignored_classes)]

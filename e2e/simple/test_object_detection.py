@@ -1,4 +1,5 @@
-from videosys.ingestion.tracking.mmtracking import MMTrackingSORT
+from videosys.ingestion.compat.mmlib import MMLibCompatable, MMLibMoveData, MMMultiScaleFlipAug
+from videosys.ingestion.tracking.mmtracking import MMTrackingDeepSORT, MMTrackingSORT
 from videosys.ingestion.tracking.centertrack import CenterTrackTracking
 from videosys.ingestion.objectdetection.centernet import CenterNetObjectDetector
 from videosys.ingestion.tracking.sort_tracker import SORTOnlineTracker
@@ -39,10 +40,11 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
     builder.add_operator(VideoSource({'file': video_path}))
+    builder.add_operator(MMLibCompatable())
     builder.add_operator(MMDetObjectDetector({
         'config_file': config_file,
         'checkpoint_file': checkpoint_file,
-        'classes': ['person']
+        # 'classes': ['person']
     }))
     # builder.add_operator(IOUOnlineTracker())
     # builder.add_operator(VIOUOnlineTracker({
@@ -50,7 +52,23 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     # }))
     # builder.add_operator(SORTOnlineTracker())
     # builder.add_operator(DeepSORTOnlineTracker())
-    builder.add_operator(MMTrackingSORT())
+    # builder.add_operator(MMTrackingSORT())
+    img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+    builder.add_operator(MMMultiScaleFlipAug({
+        'transforms': [
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(type='Normalize', **img_norm_cfg),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='VideoCollect', keys=['img'])
+        ],
+        'img_scale': (1088, 1088),
+        'flip': False,
+    }))
+    builder.add_operator(MMLibMoveData())
+    builder.add_operator(MMTrackingDeepSORT())
     builder.add_operator(ObjectTrackingVisualizer({
         'display': True
     }))

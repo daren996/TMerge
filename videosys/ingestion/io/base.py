@@ -27,8 +27,14 @@ class VideoSource(Source):
             ret, frame = self.__video.read()
             if ret:
                 self.fid += 1
+                # add image metas
+                img_meta = dict()
+                img_meta['img_shape'] = frame.shape
+                img_meta['ori_shape'] = frame.shape
+
                 self.collector.emit({fields.DATA_FRAME:frame, \
-                    fields.DATA_FRAME_ID: self.fid})
+                    fields.DATA_FRAME_ID: self.fid, 
+                    fields.DATA_FRAME_META: img_meta})
 
     def has_next(self):
         return self.__video.isOpened()
@@ -52,7 +58,14 @@ class ImageSource(Source):
     def process(self, tables=None):
         self.current += 1
         frame = cv2.imread(self.images[self.current][0])
-        self.collector.emit({fields.DATA_FRAME: frame, fields.DATA_FRAME_ID: self.current})
+        # add image metas
+        img_meta = dict()
+        img_meta['img_shape'] = frame.shape
+        img_meta['ori_shape'] = frame.shape
+        self.collector.emit({fields.DATA_FRAME: frame,
+            fields.DATA_FRAME_ID: self.current, 
+            fields.DATA_FRAME_META: img_meta}
+        )
     
     def has_next(self):
         return self.current +1 < len(self.images)

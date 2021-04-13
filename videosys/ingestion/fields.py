@@ -17,6 +17,8 @@ DATA_FRAME_ID = 'fid'
 
 DATA_FRAME = 'frame'
 
+DATA_FRAME_META = 'frame_meta'
+
 DATA_OBJECT_DETECTION = 'obj_det'
 
 DATA_OBJECT_TRACK = 'obj_track'
@@ -28,3 +30,6 @@ DATA_FRAME_DETECTION = 'frame_obj_det'
 
 # tracking result image.
 DATA_FRAME_TRACK = 'frame_obj_track'
+
+# compat:
+COMPAT_MMLIB = 'compat_mmlib'
