@@ -6,7 +6,7 @@ from videosys.ingestion.tracking.sort_tracker import SORTOnlineTracker
 from videosys.ingestion.tracking.deep_sort_tracker import DeepSORTOnlineTracker
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 from videosys.ingestion.visualize.detection import ObjectDetectionVisualizer
-from videosys.ingestion.objectdetection.mmdet import MMDetObjectDetector
+from videosys.ingestion.objectdetection.mmdet import MMDetDetectorPipeline
 from videosys.ingestion.base import SimplePipelineBuilder
 from videosys.ingestion.io.base import ImageSink, VideoSink, VideoSource
 from videosys.ingestion.tracking.viou_tracker import VIOUOnlineTracker
@@ -17,7 +17,7 @@ def detect_mmdet(video_path, config_file, checkpoint_file):
     print('detect video:', video_path)
     builder = SimplePipelineBuilder()
     builder.add_operator(VideoSource(video_path))
-    builder.add_operator(MMDetObjectDetector(config_file,checkpoint_file))
+    builder.add_operator(MMDetDetectorPipeline(config_file,checkpoint_file))
     builder.add_operator(ObjectDetectionVisualizer({
         'threshold': 0.3
     }))
@@ -36,7 +36,7 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     builder = SimplePipelineBuilder()
     builder.add_operator(VideoSource(video_path))
     builder.add_operator(MMLibCompatable())
-    builder.add_operator(MMDetObjectDetector(config_file, checkpoint_file,
+    builder.add_operator(MMDetDetectorPipeline(config_file, checkpoint_file,
         # 'classes': ['person']
     ))
     # builder.add_operator(IOUOnlineTracker())
@@ -47,7 +47,7 @@ def detect_mmdet_track(video_path, config_file, checkpoint_file):
     # builder.add_operator(DeepSORTOnlineTracker())
     # builder.add_operator(MMTrackingSORT())
     img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+        mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
     builder.add_operator(MMMultiScaleFlipAug(
         [
             dict(type='Resize', keep_ratio=True),

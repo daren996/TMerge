@@ -1,6 +1,6 @@
 from mmtrack.apis import inference_mot, init_model
 from mmtrack.core import restore_result, track2result
-from mmtrack.models.mot import DeepSORT
+from mmtrack.models.mot import DeepSORT, Tracktor
 
 import torch
 
@@ -35,12 +35,14 @@ class MMTrackingSORT(Operator):
     """
     use the SORT algorithm implemented in mm-tracking lib.
     """
+    def __init__(self, motion=None, tracker=None): 
+        self.model = DeepSORT(
+            motion=motion,
+            tracker=tracker
+        )
+        super().__init__()
     
     def prepare(self):
-        self.model = DeepSORT(
-            motion=dict(type='KalmanFilter', center_only=False),
-            tracker=dict(type='SortTracker', obj_score_thr=0.5, match_iou_thr=0.5, reid=None)
-        )
         self.tracker = self.model.tracker
         self.model.to('cuda:0')
 
@@ -80,42 +82,50 @@ class MMTrackingSORT(Operator):
         
 class MMTrackingDeepSORT(MMTrackingSORT):
 
-    def prepare(self):
+    # pylint: disable=super-init-not-called
+    def __init__(self, pretrains=None, motion=None, reid=None, tracker=None):
         self.model = DeepSORT(
-            pretrains=dict(
-                # pylint: disable=line-too-long
-                reid='https://download.openmmlab.com/mmtracking/mot/reid/tracktor_reid_r50_iter25245-a452f51f.pth'  # noqa: E501
-            ),
-            motion=dict(type='KalmanFilter', center_only=False),
-            reid=dict(
-                type='BaseReID',
-                backbone=dict(
-                    type='ResNet',
-                    depth=50,
-                    num_stages=4,
-                    out_indices=(3, ),
-                    style='pytorch'),
-                neck=dict(type='GlobalAveragePooling', kernel_size=(8, 4), stride=1),
-                head=dict(
-                    type='LinearReIDHead',
-                    num_fcs=1,
-                    in_channels=2048,
-                    fc_channels=1024,
-                    out_channels=128,
-                    norm_cfg=dict(type='BN1d'),
-                    act_cfg=dict(type='ReLU'))),
-            tracker=dict(
-                type='SortTracker',
-                obj_score_thr=0.5,
-                reid=dict(
-                    num_samples=10,
-                    img_scale=(256, 128),
-                    img_norm_cfg=None,
-                    match_score_thr=2.0),
-                match_iou_thr=0.5,
-                momentums=None,
-                num_tentatives=2,
-                num_frames_retain=100)
+            pretrains=pretrains, motion=motion, reid=reid, tracker=tracker
         )
+
+    # pylint: disable=super-init-not-called
+    def prepare(self):
         self.tracker = self.model.tracker
         self.model.to('cuda:0')
+
+class MMTrackingTracktor(Operator):
+
+    def __init__(self, pretrains=None, motion=None, reid=None, tracker=None):
+        self.model = Tracktor(
+            pretrains=pretrains, motion=motion, reid=reid, tracker=tracker
+        )
+    
+    def prepare(self):
+        self.tracker = self.model.tracker
+        self.model.to('cuda:0')
+
+    def process(self, tables):
+        num_classes = len(self.context.get(fields.META_OBJECT_DETECTION_CLASSES))
+        fid = tables[fields.DATA_FRAME_ID]
+        detections = tables[fields.DATA_OBJECT_DETECTION]
+        x = tables[fields.DATA_FEATURES]
+        data = tables[fields.COMPAT_MMLIB]
+        img_meta = data['img_metas'][0]
+        img = data['img'][0]
+            
+        bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections])
+        labels_tensor = torch.tensor([d.label for d in detections])
+
+        with torch.no_grad():
+            # convert tensor results to np.array
+            bboxes, labels, ids = self.tracker.track(img, img_meta, 
+                self.model, x, bboxes_tensor, labels_tensor, fid, rescale=True)
+        tracking_result = track2result(bboxes, labels, ids, num_classes)
+        bboxes, labels, ids = restore_result(tracking_result, return_ids=True)
+        
+        result = []
+        for bbox, label, uid in zip(bboxes, labels, ids):
+            result.append(ObjectTrackingResult(uid, label, bbox[:4], bbox[4]))
+        # print(result[-1])
+        tables[fields.DATA_OBJECT_TRACK] = result
+        self.collector.emit(tables)

@@ -1,14 +1,15 @@
 import logging
-
+import torch
 import numpy as np
 from mmdet.apis import init_detector, inference_detector
+from mmdet.core import bbox2result
 
 from videosys.ingestion import fields
 
 from videosys.ingestion.data import ObjectDetectionResult
 from ..base import Operator
 
-class MMDetObjectDetector(Operator):
+class MMDetDetectorPipeline(Operator):
     '''
     use mmdet lib to perform object detection.
     supported models can be found at
@@ -48,12 +49,20 @@ class MMDetObjectDetector(Operator):
                 segm_result = segm_result[0]  # ms rcnn
         else:
             bbox_result, segm_result = result, None
+
+        tables[fields.DATA_OBJECT_DETECTION] = self._collect_bbox_result(bbox_result)
+
+        self.collector.emit(tables)
+    
+    def _collect_bbox_result(self, bbox_result):
         # result dimension: label -> (x, 5)
         bboxes = np.vstack(bbox_result)
         labels = [
             np.full(bbox.shape[0], i, dtype=np.int32)
             for i, bbox in enumerate(bbox_result)
         ]
+        if len(bboxes) == 0:
+            return []
         assert len(bboxes[0]) == 5, 'expecting a confidence value from the NN'
         labels = np.concatenate(labels)
         # print('bbox:',bboxes[0], labels[0])
@@ -61,5 +70,52 @@ class MMDetObjectDetector(Operator):
         for bbox, label in zip(bboxes, labels):
             if self.detect_classes is None or label in self.detect_classes:
                 obj_result.append(ObjectDetectionResult(bbox[:-1], label, bbox[-1]))
-        tables[fields.DATA_OBJECT_DETECTION] = obj_result
-        self.collector.emit(tables)
+        return obj_result
+
+class MMDetDetectorWithFeatures(MMDetDetectorPipeline):
+
+    def __init__(self, rescale=True, **kwargs):
+        self.rescale=rescale
+        super().__init__(**kwargs)
+
+    def process(self, tables):
+        data = tables[fields.COMPAT_MMLIB]
+        img = data['img'][0]
+        img_metas = data['img_metas'][0]
+
+        with torch.no_grad():
+            x = self.model.extract_feat(img)
+            if hasattr(self.model, 'roi_head'):
+                # TODO: check whether this is the case
+                # if public_bboxes is not None:
+                #     public_bboxes = [_[0] for _ in public_bboxes]
+                #     proposals = public_bboxes
+                # else:
+                #     proposals = self.detector.rpn_head.simple_test_rpn(
+                #         x, img_metas)
+                proposals = self.model.rpn_head.simple_test_rpn(x, img_metas)
+                det_bboxes, det_labels = self.model.roi_head.simple_test_bboxes(
+                    x,
+                    img_metas,
+                    proposals,
+                    self.model.roi_head.test_cfg,
+                    rescale=self.rescale)
+                # TODO: support batch inference
+                det_bboxes = det_bboxes[0]
+                det_labels = det_labels[0]
+                num_classes = self.model.roi_head.bbox_head.num_classes
+            elif hasattr(self.model, 'bbox_head'):
+                outs = self.model.bbox_head(x)
+                result_list = self.model.bbox_head.get_bboxes(
+                    *outs, img_metas=img_metas, rescale=self.rescale)
+                # TODO: support batch inference
+                det_bboxes = result_list[0][0]
+                det_labels = result_list[0][1]
+                num_classes = self.model.bbox_head.num_classes
+            else:
+                raise TypeError('model must has roi_head or bbox_head.')
+            # emit x & det values.
+            bbox_result = bbox2result(det_bboxes, det_labels, num_classes)
+            tables[fields.DATA_OBJECT_DETECTION] = self._collect_bbox_result(bbox_result)
+            tables[fields.DATA_FEATURES] = x
+            self.collector.emit(tables)

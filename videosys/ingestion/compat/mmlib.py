@@ -20,6 +20,8 @@ class MMLibCompatable(Operator):
             'ori_shape': img.shape,
             'img_fields': ['img'],
             'img_info': img_info,
+            'filename': None,
+            'ori_filename': None,
         }
 
         tables[fields.COMPAT_MMLIB] = results

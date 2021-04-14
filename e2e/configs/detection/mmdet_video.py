@@ -1,5 +1,5 @@
 from videosys.ingestion.io.base import VideoSource
-from videosys.ingestion.objectdetection.mmdet import MMDetObjectDetector
+from videosys.ingestion.objectdetection.mmdet import MMDetDetectorPipeline
 from videosys.ingestion.visualize.detection import ObjectDetectionVisualizer
 
 args = dict(
@@ -12,6 +12,6 @@ args = dict(
 
 operators = [
     VideoSource(args['file']),
-    MMDetObjectDetector(args['config_file'], args['checkpoint_file']),
+    MMDetDetectorPipeline(args['config_file'], args['checkpoint_file']),
     ObjectDetectionVisualizer(threshold=0.3)
 ]

@@ -21,6 +21,9 @@ DATA_FRAME_META = 'frame_meta'
 
 DATA_OBJECT_DETECTION = 'obj_det'
 
+# feature map.
+DATA_FEATURES = 'feat'
+
 DATA_OBJECT_TRACK = 'obj_track'
 
 DATA_OBJECT_TRACK_GT = 'obj_track_gt'
