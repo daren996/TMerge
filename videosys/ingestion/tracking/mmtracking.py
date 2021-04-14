@@ -95,6 +95,7 @@ class MMTrackingDeepSORT(MMTrackingSORT):
 
 class MMTrackingTracktor(Operator):
 
+    # pylint: disable=super-init-not-called
     def __init__(self, pretrains=None, motion=None, reid=None, tracker=None):
         self.model = Tracktor(
             pretrains=pretrains, motion=motion, reid=reid, tracker=tracker

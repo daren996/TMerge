@@ -34,5 +34,11 @@ DATA_FRAME_DETECTION = 'frame_obj_det'
 # tracking result image.
 DATA_FRAME_TRACK = 'frame_obj_track'
 
+# sot result
+DATA_SOT_RESULT = 'frame_sot'
 # compat:
 COMPAT_MMLIB = 'compat_mmlib'
+
+
+# select roi
+SELECT_ROI = 'select_roi'

@@ -17,3 +17,8 @@ python e2e/ingestion_runner.py e2e/configs/tracking/mmt-sort-private.py
 ```
 python e2e/ingestion_runner.py e2e/configs/tracking/mmt-deepsort-private.py
 ```
+
+# sot
+```
+python e2e/ingestion_runner.py e2e/configs/sot/mmt-pipeline-siamese_rpn.py
+```

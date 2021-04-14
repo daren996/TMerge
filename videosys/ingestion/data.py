@@ -42,3 +42,9 @@ class ObjectTrackingResult:
     confidence: float
     payload: object = None # other data.
     
+
+@dataclass
+class SOTResult:
+    bbox: list
+    score: float
+    
