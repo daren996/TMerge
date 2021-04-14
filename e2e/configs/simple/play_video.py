@@ -1,12 +1,15 @@
 from videosys.ingestion.visualize.image import ImageVisualizer
-from videosys.ingestion.io.base import ImageSource
+from videosys.ingestion.io.base import VideoSource
 
-args = dict(
-    folder='/media/ytchen/hdd/dataset/2DMOT2015/test/ADL-Rundle-1/img1',
-    auto_play=True
+description = "play video"
+
+default_args = dict(
+    video=('video path', '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'),
+    no_auto_play=('whether to play the video manully', False)
 )
 
-operators = [
-    ImageSource(args['folder']),
-    ImageVisualizer(args['auto_play'])
-]
+def operators(args):
+    return [
+        VideoSource(args.video),
+        ImageVisualizer(not args.no_auto_play)
+    ]
