@@ -18,3 +18,4 @@ class SOTVisualizer(Operator):
             id_func=lambda _:1)
         cv2.imshow(self.window_name, image)
         cv2.waitKey(100)
+        self.collector.emit(tables)

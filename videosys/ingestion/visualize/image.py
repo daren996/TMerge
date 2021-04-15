@@ -35,7 +35,7 @@ class ImageVisualizer(Operator):
             cv2.waitKey(round(1000/self.__fps))
             if cv2.getWindowProperty(self.window_name, cv2.WND_PROP_VISIBLE) < 1:
                 self.controller.stop()
-            self.collector.emit()
+            self.collector.emit(tables)
         else:
             listen_key_events(self.window_name,
                 { 'n': lambda: self.collector.emit },

@@ -63,6 +63,7 @@ class MMTrackingSORT(Operator):
         # print('img_meta', img_meta)
 
         bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections])
+        
         labels_tensor = torch.tensor([d.label for d in detections])
 
         with torch.no_grad():

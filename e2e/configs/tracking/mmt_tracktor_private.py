@@ -1,24 +1,28 @@
 
+from videosys.ingestion.observer.reporter import ProgressReporter
+from videosys.ingestion.io.tracking import MOTResultSink
 from videosys.ingestion.tracking.mmtracking import MMTrackingDeepSORT
 from videosys.ingestion.io.base import VideoSource
 from videosys.ingestion.compat.mmlib import MMLibCompatable, MMLibMoveData, MMMultiScaleFlipAug
-from videosys.ingestion.objectdetection.mmdet import MMDetDetectorPipeline
+from videosys.ingestion.objectdetection.mmdet import MMDetDetectorWithFeatures
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 
 default_args = dict(
     video='/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
-    config='../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
+    config = '../mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py',
     # pylint: disable=line-too-long
-    checkpoint='../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
+    checkpoint = '../mmdetection/checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',
+    display=False,
+    output='../storage/results/mot16/MOT16-03-faster_rcnn-tracktor.txt',
+    no_report_save = False
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
 def operators(args):
-    return [
+    ops = [
         VideoSource(args.video),
         MMLibCompatable(),
-        MMDetDetectorPipeline(args.config, args.checkpoint),
         MMMultiScaleFlipAug([
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
@@ -28,6 +32,7 @@ def operators(args):
             dict(type='VideoCollect', keys=['img'])
         ], img_scale=(1088, 1088), flip=False),
         MMLibMoveData(),
+        MMDetDetectorWithFeatures(config_file = args.config, checkpoint_file=args.checkpoint),
         MMTrackingDeepSORT(
             pretrains=dict(
                 # pylint: disable=line-too-long
@@ -63,6 +68,12 @@ def operators(args):
                 momentums=None,
                 num_tentatives=2,
                 num_frames_retain=100)
-        ),
-        ObjectTrackingVisualizer(display=True)
+        )
     ]
+    if not args.output == '':
+        ops.append(MOTResultSink(args.output))
+    if args.display:
+        ops.append(ObjectTrackingVisualizer(display=True))
+    ops.append(ProgressReporter(save_file = args.output+'.report' 
+            if not args.no_report_save else None))
+    return ops

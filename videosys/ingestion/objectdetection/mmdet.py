@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from mmdet.apis import init_detector, inference_detector
 from mmdet.core import bbox2result
+from mmdet.models import detectors
 
 from videosys.ingestion import fields
 
@@ -114,6 +115,7 @@ class MMDetDetectorWithFeatures(MMDetDetectorPipeline):
                 num_classes = self.model.bbox_head.num_classes
             else:
                 raise TypeError('model must has roi_head or bbox_head.')
+            # print('det_bboxes', det_bboxes.shape)
             # emit x & det values.
             bbox_result = bbox2result(det_bboxes, det_labels, num_classes)
             tables[fields.DATA_OBJECT_DETECTION] = self._collect_bbox_result(bbox_result)

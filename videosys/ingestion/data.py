@@ -10,10 +10,12 @@ class VideoMeta:
     width: int
     height: int
     frame_count: int
+    path: str
 
 @dataclass
 class ImageFolderMeta:
     total: int
+    path: str
 
 
 # ============= data classes

@@ -22,6 +22,7 @@ class AbstractTrackResultSink(Operator):
             self.store(fid, track_results)
         else:
             self.__buffers.append(tables)
+        self.collector.emit(tables)
 
     def cleanup(self):
         if self.__save_at_end:
