@@ -7,12 +7,14 @@ from videosys.utils.visualize_utils import draw_bbox_and_labels
 
 class ObjectTrackingVisualizer(Operator):
     def __init__(self, window_name='track_vis', visualize_track=True, 
-            visualize_track_gt=False, display=True):
+            visualize_track_gt=False, display=True, thickness = 1, font_scale=.5):
         super().__init__()
         self.window_name = window_name
         self.__visualize_track = visualize_track
         self.__visualize_track_gt = visualize_track_gt
         self.display = display
+        self.thickness = thickness
+        self.font_scale = font_scale
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):
@@ -46,14 +48,17 @@ class ObjectTrackingVisualizer(Operator):
             result = tables[fields.DATA_OBJECT_TRACK]
             # visualize.
             image = draw_bbox_and_labels(frame, result, self.__extract_bbox, 
-                self.__generate_label, id_func=self.__extract_id)
+                self.__generate_label, id_func=self.__extract_id, 
+                font_thickness= self.thickness, thickness=self.thickness, 
+                font_scale= self.font_scale)
         if self.__visualize_track_gt:
             result = tables[fields.DATA_OBJECT_TRACK_GT]
             image = draw_bbox_and_labels(frame, result, self.__extract_bbox, 
-                lambda x: self.__generate_label(x, True), id_func=self.__extract_id)
+                lambda x: self.__generate_label(x, True), id_func=self.__extract_id, 
+                font_thickness= self.thickness, thickness=self.thickness, 
+                font_scale= self.font_scale)
         if self.display:
             cv2.imshow(self.window_name, image)
             cv2.waitKey(100)
-        else:
-            tables[fields.DATA_FRAME_TRACK] = image
+        tables[fields.DATA_FRAME_TRACK] = image
         self.collector.emit(tables)

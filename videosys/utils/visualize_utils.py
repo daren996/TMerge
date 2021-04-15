@@ -36,7 +36,7 @@ def draw_bbox_and_labels(image, objs, bbox_func, label_func, \
     label_color = color_val(label_color) if label_color else None
     if copy_image:
         image = image.copy()
-    text_width, text_height = 10, 15
+    text_width, text_height = 20 * font_scale, 30 * font_scale
     for obj in objs:
         bbox = bbox_func(obj).astype(np.int32)
         left_top = (bbox[0], bbox[1])

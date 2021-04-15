@@ -52,3 +52,30 @@ python e2e/ingestion_runner.py e2e/configs/tracking/uma_private.py \
 ```
 python e2e/ingestion_runner.py e2e/configs/sot/mmt_pipeline_siamese_rpn.py
 ```
+
+# tools
+
+generate MOT result videos.
+
+```
+python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
+    --result_path ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-sort-person.txt \
+    --output_folder ../storage/results/mot17/videos/ \
+    --output_name MOT17-11-faster_rcnn-sort-person --fps 30
+    
+
+python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
+    --result_path ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-deepsort-person.txt \
+    --output_folder ../storage/results/mot17/videos/ \
+    --output_name MOT17-11-faster_rcnn-deepsort-person --fps 30
+
+python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
+    --result_path ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-tracktor-person.txt \
+    --output_folder ../storage/results/mot17/videos/ \
+    --output_name MOT17-11-faster_rcnn-tracktor-person --fps 30
+
+python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
+    --result_path ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-uma-person.txt \
+    --output_folder ../storage/results/mot17/videos/ \
+    --output_name MOT17-11-faster_rcnn-uma-person --fps 30
+```

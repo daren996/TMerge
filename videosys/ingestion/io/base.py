@@ -85,10 +85,11 @@ class ImageSource(Source):
 # =============== sink operators
     
 class VideoSink(Operator):
-    def __init__(self, path, name, image_key = fields.DATA_FRAME):
+    def __init__(self, path, name, image_key = fields.DATA_FRAME, fps=None):
         self.path = path
         self.name = name
         self.image_key = image_key
+        self.fps = fps
         super().__init__()
 
     def prepare(self):
@@ -98,8 +99,9 @@ class VideoSink(Operator):
             os.makedirs(self.path)
         if self.context.has(fields.META_VIDEO):
             video_meta = self.context.get(fields.META_VIDEO)
-            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-            self.out = cv2.VideoWriter(self.file_name, fourcc, video_meta.fps, 
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            self.out = cv2.VideoWriter(self.file_name, fourcc, 
+                self.fps if self.fps is not None else video_meta.fps, 
                 (int(video_meta.width), int(video_meta.height)))
             
 
@@ -108,10 +110,12 @@ class VideoSink(Operator):
         image = tables[self.image_key]
         if self.out is None:
             # init
-            fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-            self.out = cv2.VideoWriter(self.file_name, fourcc, 25.0,
-                 (int(image.shape[0]),int(image.shape[1])))
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            self.out = cv2.VideoWriter(self.file_name, fourcc, 
+                self.fps if self.fps is not None else 30.,
+                 (int(image.shape[1]),int(image.shape[0])))
         self.out.write(image)
+        self.collector.emit(tables)
     
     def cleanup(self):
         self.out.release()
@@ -119,7 +123,7 @@ class VideoSink(Operator):
 class ImageSink(Operator):
     def __init__(self, path, image_key = fields.DATA_FRAME):
         self.path = path
-        self.image_key = fields.DATA_FRAME
+        self.image_key = image_key
         super().__init__()
 
     def prepare(self):
@@ -132,3 +136,4 @@ class ImageSink(Operator):
         fid = tables[fields.DATA_FRAME_ID]
         image = tables[self.image_key]
         cv2.imwrite(os.path.join(self.path, '{}.png'.format(fid)), image)
+        self.collector.emit(tables)

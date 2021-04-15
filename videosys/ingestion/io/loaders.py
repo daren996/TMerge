@@ -34,19 +34,20 @@ class MOTDetLoader(Operator):
         tables[fields.DATA_OBJECT_DETECTION] = self.frame_det_dict[fid]
         self.collector.emit(tables)
 
-class MOTGTLoader(Operator):
+class MOTFormatLoader(Operator):
     """
     load ground truth gt.txt provided by MOT datasets.
     
     data will be put into fields.DATA_OBJECT_TRACK_GT
     """
-    def __init__(self, folder_path):
-        self.folder_path = folder_path
+    def __init__(self, file_path, emit_key):
+        self.file_path = file_path
+        self.emit_key = emit_key
         super().__init__()
 
     def prepare(self):
         self.frame_det_dict = defaultdict(list)
-        with open('{}/gt/gt.txt'.format(self.folder_path)) as f:
+        with open(self.file_path) as f:
             for line in f.readlines():
                 arr = line.split(',')
                 frame_id = int(arr[0])
@@ -64,5 +65,13 @@ class MOTGTLoader(Operator):
 
     def process(self, tables):
         fid = tables[fields.DATA_FRAME_ID]
-        tables[fields.DATA_OBJECT_TRACK_GT] = self.frame_det_dict[fid]
+        tables[self.emit_key] = self.frame_det_dict[fid]
         self.collector.emit(tables)
+
+class MOTResultLoader(MOTFormatLoader):
+    def __init__(self, file_path):
+        super().__init__(file_path, emit_key=fields.DATA_OBJECT_TRACK)
+
+class MOTGTLoader(MOTFormatLoader):
+    def __init__(self, file_path):
+        super().__init__(file_path, emit_key=fields.DATA_OBJECT_TRACK_GT)
