@@ -45,6 +45,7 @@ class MMTrackingSORT(Operator):
     def prepare(self):
         self.tracker = self.model.tracker
         self.model.to('cuda:0')
+        self.model.eval()
 
     def process(self, tables):
         num_classes = len(self.context.get(fields.META_OBJECT_DETECTION_CLASSES))
@@ -69,7 +70,7 @@ class MMTrackingSORT(Operator):
         with torch.no_grad():
             # convert tensor results to np.array
             bboxes, labels, ids = self.tracker.track(image, img_meta, 
-                self.model, bboxes_tensor, labels_tensor, fid)
+                self.model, bboxes_tensor, labels_tensor, fid, rescale=True)
         tracking_result = track2result(bboxes, labels, ids, num_classes)
         bboxes, labels, ids = restore_result(tracking_result, return_ids=True)
         
@@ -93,6 +94,7 @@ class MMTrackingDeepSORT(MMTrackingSORT):
     def prepare(self):
         self.tracker = self.model.tracker
         self.model.to('cuda:0')
+        self.model.eval()
 
 class MMTrackingTracktor(Operator):
 
@@ -105,6 +107,9 @@ class MMTrackingTracktor(Operator):
     def prepare(self):
         self.tracker = self.model.tracker
         self.model.to('cuda:0')
+        # inject detector.
+        self.model.detector = self.context.get(fields.SHARED_MMDET_MODEL)
+        self.model.eval()
 
     def process(self, tables):
         num_classes = len(self.context.get(fields.META_OBJECT_DETECTION_CLASSES))
@@ -115,7 +120,7 @@ class MMTrackingTracktor(Operator):
         img_meta = data['img_metas'][0]
         img = data['img'][0]
             
-        bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections])
+        bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections]).cuda()
         labels_tensor = torch.tensor([d.label for d in detections])
 
         with torch.no_grad():
