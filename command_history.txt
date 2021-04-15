@@ -17,8 +17,8 @@ pip install terminaltables mmpycocotools
 pip install lap scipy filterpy
 # for viou tracker
 pip install lapsolver
-# for Deep SORT, or install tensorflow (cpu only)
-pip install tensorflow-gpu==2.4.0
+# for Deep SORT, or install tensorflow (CUDA 10.1 compatiable)
+pip install tensorflow==2.3.0
 # for CenterNet
 pip install progress
 # for MOT metrics
@@ -29,3 +29,11 @@ pip install mmcls
 # for CenterTrack
 pip install numba
 pip install pyquaternion
+
+# for tracking_wo_bnw
+pip install scared
+pip install easydict
+pip install tensorboardX
+
+# for uma-mot
+pip install tf_slim
