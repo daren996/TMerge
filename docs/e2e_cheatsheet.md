@@ -78,4 +78,10 @@ python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
     --result_path ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-uma-person.txt \
     --output_folder ../storage/results/mot17/videos/ \
     --output_name MOT17-11-faster_rcnn-uma-person --fps 30
+
+
+python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
+    --result_path /media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/gt/gt.txt \
+    --output_folder ../storage/results/mot17/videos/ \
+    --output_name MOT17-11-gt --fps 30
 ```

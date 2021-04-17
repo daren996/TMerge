@@ -24,14 +24,3 @@ def load_and_eval(methods_, gt_):
     print(mm.io.render_summary(summary, formatters=mh.formatters, 
         namemap=mm.io.motchallenge_metric_names))
     logging.info('Completed')
-
-
-if __name__ == '__main__':
-    methods_list = [
-        ('SORT', '../storage/results/mot17/MOT17-11-DPM-faster_rcnn-sort-person.txt'),
-        ('DeepSORT', '../storage/results/mot17/MOT17-11-DPM-faster_rcnn-deepsort-person.txt'),
-        ('Tracktor', '../storage/results/mot17/MOT17-11-DPM-faster_rcnn-tracktor-person.txt'),
-        ('UMA-MOT', '../storage/results/mot17/MOT17-11-DPM-faster_rcnn-uma-person.txt'),
-    ]
-    gt_file = '/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/gt/gt.txt'
-    load_and_eval(methods_list, gt_file)

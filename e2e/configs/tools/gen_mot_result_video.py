@@ -20,7 +20,7 @@ def operators(args):
         create_source_for_path(args.data_path),
         MOTResultLoader(args.result_path),
         ObjectTrackingVisualizer(display=False, thickness=int(args.thickness), 
-            font_scale = int(args.font_scale)),
+            font_scale = float(args.font_scale)),
         VideoSink(args.output_folder, args.output_name, fields.DATA_FRAME_TRACK, 
             None if args.fps == '' else int(args.fps)),
         ProgressReporter()

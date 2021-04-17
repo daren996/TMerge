@@ -1,4 +1,3 @@
-
 from e2e.configs.utils import create_source_for_path
 from videosys.ingestion.observer.reporter import ProgressReporter
 from videosys.ingestion.io.tracking import MOTResultSink
