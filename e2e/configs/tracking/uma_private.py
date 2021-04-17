@@ -2,7 +2,6 @@ from e2e.configs.utils import create_source_for_path
 from videosys.ingestion.observer.reporter import ProgressReporter
 from videosys.ingestion.io.tracking import MOTResultSink
 from videosys.ingestion.tracking.uma_mot import UMAMOT
-from videosys.ingestion.io.base import VideoSource
 from videosys.ingestion.compat.mmlib import MMLibCompatable, MMLibMoveData, MMMultiScaleFlipAug
 from videosys.ingestion.objectdetection.mmdet import MMDetDetectorWithFeatures
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
