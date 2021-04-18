@@ -70,7 +70,7 @@ def save_mot(source_path, mot_det, mot_save_path):
 
 if __name__ == '__main__':
     sequence = 'MOT17-11-DPM'
-    dataset = '/media/ytchen/hdd/dataset/MOT17/train/'+sequence
+    dataset = '../storage/dataset/MOT17/train/'+sequence
 
     # run_mot('{}/img1'.format(dataset), dataset)
     save_mot('{}/img1'.format(dataset), dataset, './output/{}.txt'.format(sequence))

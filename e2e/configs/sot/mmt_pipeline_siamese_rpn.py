@@ -4,7 +4,7 @@ from videosys.ingestion.tracking.sot.base import SelectROI
 from videosys.ingestion.tracking.sot.mmtracking import MMTrackSOTPipeline
 
 default_args = dict(
-    video='/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    video='../storage/dataset/videos/MOT16-03.mp4',
     config_file='../mmtracking/configs/sot/siamese_rpn/siamese_rpn_r50_1x_lasot.py',
     checkpoint_file='../storage/models/siamese_rpn_r50_1x_lasot_20201218_051019-3c522eff.pth',
 )

@@ -5,7 +5,7 @@ from videosys.ingestion.io.base import VideoSource
 description = "play video"
 
 default_args = dict(
-    video=('video path', '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'),
+    video=('video path', '../storage/dataset/videos/MOT16-03.mp4'),
     no_auto_play=('whether to play the video manully', False)
 )
 

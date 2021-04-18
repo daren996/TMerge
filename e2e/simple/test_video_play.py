@@ -17,5 +17,5 @@ def play_image_folder(folder_path, auto_play = False):
     builder.build().start()
 
 if __name__ == '__main__':
-    play_video('/media/ytchen/hdd/dataset/videos/MOT16-03.mp4', True)
-    # play_image_folder('/media/ytchen/hdd/dataset/2DMOT2015/test/ADL-Rundle-1/img1', False)
+    play_video('../storage/dataset/videos/MOT16-03.mp4', True)
+    # play_image_folder('../storage/dataset/2DMOT2015/test/ADL-Rundle-1/img1', False)

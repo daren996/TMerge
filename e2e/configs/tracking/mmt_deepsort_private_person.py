@@ -1,8 +1,8 @@
 from .mmt_deepsort_private import operators as private_operators
 
 default_args = dict(
-    path='/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/img1',
-    # path='/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    path='../storage/dataset/MOT17/train/MOT17-11-DPM/img1',
+    # path='../storage/dataset/videos/MOT16-03.mp4',
     config = './e2e/configs/mmtracking/detector/faster_rcnn_r50_fpn_one_class.py',
     # pylint: disable=line-too-long
     checkpoint = 'https://download.openmmlab.com/mmtracking/mot/faster_rcnn/faster-rcnn_r50_fpn_4e_mot17-half-64ee2ed4.pth',

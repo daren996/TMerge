@@ -74,5 +74,5 @@ class MOTResultSink(AbstractTrackResultSink):
                 f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}'
                     .format(fid, t.uid, t.bbox[0], t.bbox[1], 
                     t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1], 
-                    1, -1, -1, -1))
+                    t.confidence, -1, -1, -1))
                 f.write('\n')

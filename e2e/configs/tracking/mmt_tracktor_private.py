@@ -7,7 +7,7 @@ from videosys.ingestion.objectdetection.mmdet import MMDetDetectorWithFeatures
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 
 default_args = dict(
-    path='/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/img1',
+    path='../storage/dataset/MOT17/train/MOT17-11-DPM/img1',
     config = '../mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py',
     # pylint: disable=line-too-long
     checkpoint = '../mmdetection/checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',

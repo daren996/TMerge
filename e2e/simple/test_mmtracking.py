@@ -11,6 +11,6 @@ def mmtracking(video_path, config_file):
 
 if __name__ == '__main__':
     mmtracking(
-        '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+        '../storage/dataset/videos/MOT16-03.mp4',
         '../mmtracking/configs/mot/deepsort/sort_faster-rcnn_fpn_4e_mot17-private.py',
     )

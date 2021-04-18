@@ -2,9 +2,9 @@ import os
 
 def produce_all_videos(dataset_name, fps, thickness, font_scale):
 
-    dataset_template = '/media/ytchen/hdd/dataset/MOT17/train/{dataset_name}/img1'
+    dataset_template = '../storage/dataset/MOT17/train/{dataset_name}/img1'
     result_template = '../storage/results/mot17/{dataset_name}/{det_method}-{method}-person.txt'
-    gt_template='/media/ytchen/hdd/dataset/MOT17/train/{dataset_name}/gt/gt.txt'
+    gt_template='../storage/dataset/MOT17/train/{dataset_name}/gt/gt.txt'
     output_template = '../storage/results/mot17/{dataset_name}/videos'
     
     method_list = [
@@ -47,6 +47,6 @@ def produce_all_videos(dataset_name, fps, thickness, font_scale):
     os.system(command)
 
 if __name__ == '__main__':
-    produce_all_videos('MOT17-09-DPM', '30', '2', '0.5')
-    # produce_all_videos('MOT17-11-DPM', '30', '3', '1')
-    # produce_all_videos('MOT17-13-DPM', '25', '2', '0.5')
+    # produce_all_videos('MOT17-09-DPM', '30', '2', '0.5')
+    # produce_all_videos('MOT17-11-DPM', '30', '3', '0.7')
+    produce_all_videos('MOT17-13-DPM', '25', '2', '0.5')

@@ -104,23 +104,23 @@ def detect_centertrack(video_path):
 
 if __name__ == '__main__':
     # detect_mmdet(
-    #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    #     '../storage/dataset/videos/MOT16-03.mp4',
     #     '../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
     #     # pylint: disable=line-too-long
     #     '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
     # )
 
     # detect_mmdet_track(
-    #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    #     '../storage/dataset/videos/MOT16-03.mp4',
     #     '../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
     #     # pylint: disable=line-too-long
     #     '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
     # )
 
     # detect_centernet(
-    #     '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'
+    #     '../storage/dataset/videos/MOT16-03.mp4'
     # )
     
     detect_centertrack(
-        '/media/ytchen/hdd/dataset/videos/MOT16-03.mp4'
+        '../storage/dataset/videos/MOT16-03.mp4'
     )

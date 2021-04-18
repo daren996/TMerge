@@ -6,7 +6,7 @@ from videosys.ingestion import fields
 from e2e.configs.utils import create_source_for_path
 
 default_args = dict(
-    data_path='/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/img1',
+    data_path='../storage/dataset/MOT17/train/MOT17-11-DPM/img1',
     result_path = None,
     output_folder = None,
     output_name = None,

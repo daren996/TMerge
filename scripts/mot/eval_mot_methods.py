@@ -9,7 +9,7 @@ def eval_all_methods(dataset):
         ('UMA-MOT', 'uma', 'faster_rcnn'),
         ('CenterTrack', 'center_track', 'center_net')
     ]
-    gt_file = '/media/ytchen/hdd/dataset/MOT17/train/{dataset}/gt/gt.txt'
+    gt_file = '../storage/dataset/MOT17/train/{dataset}/gt/gt.txt'
 
 
     load_and_eval(
@@ -20,5 +20,5 @@ def eval_all_methods(dataset):
 
 if __name__ == '__main__':
     eval_all_methods('MOT17-09-DPM')
-    # eval_all_methods('MOT17-11-DPM')
-    # eval_all_methods('MOT17-13-DPM')
+    eval_all_methods('MOT17-11-DPM')
+    eval_all_methods('MOT17-13-DPM')

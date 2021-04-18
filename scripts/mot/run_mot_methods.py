@@ -3,7 +3,7 @@
 import os
 
 def run_all_methods(dataset_name):
-    dataset_template = '/media/ytchen/hdd/dataset/MOT17/train/{dataset_name}/img1'
+    dataset_template = '../storage/dataset/MOT17/train/{dataset_name}/img1'
     model_config = './e2e/configs/mmtracking/detector/faster_rcnn_r50_fpn_one_class.py'
     checkpoint = 'https://download.openmmlab.com/mmtracking/mot/faster_rcnn/faster-rcnn_r50_fpn_4e_mot17-half-64ee2ed4.pth'
     output_template = '../storage/results/mot17/{dataset_name}/{det_method}-{method}-person.txt'
@@ -36,6 +36,6 @@ def run_all_methods(dataset_name):
         # print(' '.join(tokens))
 
 if __name__ == '__main__':
-    # run_all_methods('MOT17-09-DPM')
-    # run_all_methods('MOT17-11-DPM')
+    run_all_methods('MOT17-09-DPM')
+    run_all_methods('MOT17-11-DPM')
     run_all_methods('MOT17-13-DPM')

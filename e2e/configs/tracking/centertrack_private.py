@@ -7,7 +7,7 @@ from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 
 
 default_args = dict(
-    path='/media/ytchen/hdd/dataset/MOT17/train/MOT17-11-DPM/img1',
+    path='../storage/dataset/MOT17/train/MOT17-11-DPM/img1',
     model_path = 'models/centertrack/coco_tracking.pth',
     display=False,
     output='../storage/results/mot17/MOT17-11-DPM/centertrack.txt',

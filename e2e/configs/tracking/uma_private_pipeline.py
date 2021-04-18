@@ -5,7 +5,7 @@ from videosys.ingestion.objectdetection.mmdet import MMDetDetectorPipeline
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer
 
 default_args = dict(
-    video='/media/ytchen/hdd/dataset/videos/MOT16-03.mp4',
+    video='../storage/dataset/videos/MOT16-03.mp4',
     config='../mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco.py',
     # pylint: disable=line-too-long
     checkpoint='../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth'
