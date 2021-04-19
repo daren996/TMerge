@@ -1,6 +1,7 @@
 from tools.mot.mot_method_eval import load_and_eval
 
 def eval_all_methods(dataset):
+    print('dataset:', dataset)
     result_template= '../storage/results/mot17/{dataset}/{det_method}-{method}-person.txt'
     methods_list = [
         ('SORT', 'sort', 'faster_rcnn'),

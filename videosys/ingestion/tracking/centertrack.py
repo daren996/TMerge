@@ -7,17 +7,22 @@ from videosys.ingestion.data import ObjectDetectionResult, ObjectTrackingResult
 from videosys.ingestion import fields
 
 class CenterTrackTracking(Operator):
-    def __init__(self, model_path, detect_classes= None):
+    def __init__(self, model_path, detect_classes= None, num_class=None):
         super().__init__()
         self.model_path = model_path
         self.detect_classes = detect_classes
+        self.num_class = num_class
 
     def prepare(self):
+        extra_params = []
+        if self.num_class is not None:
+            extra_params += ['--num_class', str(self.num_class)]
         self.tracker = Detector(opts().init(
             args = [
                 'tracking',
                 '--load_model',
                 self.model_path,
+                *extra_params
             ]
         ))
         classes = self.tracker.debugger.names
@@ -36,6 +41,7 @@ class CenterTrackTracking(Operator):
         frame = tables[fields.DATA_FRAME]
         det_result = self.tracker.run(frame)
         #  [{'bbox': [x1, y1, x2, y2], 'tracking_id': id, 'category_id': c, ...}]
+        
         bbox_result = det_result['results']
 
         track_result = []

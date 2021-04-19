@@ -18,7 +18,7 @@ def run_all_methods(dataset_name):
         ('deepsort','mmt_deepsort_private.py', 'faster_rcnn', params_for_faster_rcnn),
         ('tracktor', 'mmt_tracktor_private.py', 'faster_rcnn', params_for_faster_rcnn),
         ('uma', 'uma_private.py', 'faster_rcnn', params_for_faster_rcnn),
-        ('center_track', 'centertrack_private.py', 'center_net', ['--classes', 'person'])
+        ('center_track', 'centertrack_private.py', 'center_net', [])
     ]
 
     for py in method_lists:
