@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from tools.mot.mot_duration_statistics import StatisticsProducer
 
 def show_statistics_for_dataset(dataset):
@@ -9,10 +10,13 @@ def show_statistics_for_dataset(dataset):
         ('tracktor', template.format(data_folder, dataset, det_method, 'tracktor')),
         ('sort', template.format(data_folder, dataset, det_method, 'sort')),
         ('deepsort', template.format(data_folder, dataset, det_method, 'deepsort')),
-        ('uma', template.format(data_folder, dataset, det_method, 'uma'))
+        ('uma', template.format(data_folder, dataset, det_method, 'uma')),
+        ('gt', '../storage/dataset/MOT17/train/{}/gt/gt.txt'.format(dataset))
     ])
     p.load_and_compute_all()
     # p.show()
+    # setup size
+    plt.figure(figsize=(16,9))
     p.save('../storage/results/mot17/{}/statistics.png'.format(dataset), dpi=1000)
 
 if __name__ == '__main__':

@@ -37,3 +37,6 @@ pip install tensorboardX
 
 # for uma-mot
 pip install tf_slim
+
+# for excel output
+pip install openpyxl
