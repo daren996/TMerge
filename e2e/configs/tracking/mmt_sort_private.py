@@ -15,7 +15,9 @@ default_args = dict(
     display=False,
     # output='../storage/results/mot16/MOT16-03-faster_rcnn-sort.txt',
     output='../storage/results/mot17/MOT17-11-DPM-faster_rcnn-sort.txt',
-    no_report_save = False
+    no_report_save = False,
+    obj_score_threshold='0.5',
+    match_iou_threshold='0.5',
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -36,7 +38,8 @@ def operators(args):
         MMDetDetectorWithFeatures(config_file = args.config, checkpoint_file=args.checkpoint),
         MMTrackingSORT(
             motion=dict(type='KalmanFilter', center_only=False),
-            tracker=dict(type='SortTracker', obj_score_thr=0.5, match_iou_thr=0.5, reid=None)
+            tracker=dict(type='SortTracker', obj_score_thr=float(args.obj_score_threshold), 
+                match_iou_thr=float(args.match_iou_threshold), reid=None)
         ),
     ]
     if not args.output == '':

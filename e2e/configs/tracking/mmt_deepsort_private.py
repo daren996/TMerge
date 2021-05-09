@@ -17,6 +17,10 @@ default_args = dict(
     output='../storage/results/mot17/MOT17-11-DPM-faster_rcnn-deepsort.txt',
     classes='',
     no_report_save = False,
+    obj_score_threshold='0.5',
+    match_iou_threshold='0.5',
+    num_samples='10',
+    match_score_threshold='2.0'
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -63,13 +67,13 @@ def operators(args):
                     act_cfg=dict(type='ReLU'))),
             tracker=dict(
                 type='SortTracker',
-                obj_score_thr=0.5,
+                obj_score_thr=float(args.obj_score_threshold),
                 reid=dict(
-                    num_samples=10,
+                    num_samples=int(args.num_samples),
                     img_scale=(256, 128),
                     img_norm_cfg=None,
-                    match_score_thr=2.0),
-                match_iou_thr=0.5,
+                    match_score_thr=float(args.match_score_threshold)),
+                match_iou_thr=float(args.match_iou_threshold),
                 momentums=None,
                 num_tentatives=2,
                 num_frames_retain=100)

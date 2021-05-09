@@ -13,7 +13,11 @@ default_args = dict(
     checkpoint = '../mmdetection/checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',
     display=False,
     output='../storage/results/mot17/MOT17-11-DPM-faster_rcnn-tracktor.txt',
-    no_report_save = False
+    no_report_save = False,
+    obj_score_threshold='0.5',
+    match_iou_threshold='0.5',
+    num_samples='10',
+    match_score_threshold='2.0'
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -61,17 +65,17 @@ def operators(args):
                 stop_eps=0.00001),
             tracker=dict(
                 type='TracktorTracker',
-                obj_score_thr=0.5,
+                obj_score_thr=float(args.obj_score_threshold),
                 regression=dict(
                     obj_score_thr=0.5,
                     nms=dict(type='nms', iou_threshold=0.6),
                     match_iou_thr=0.3),
                 reid=dict(
-                    num_samples=10,
+                    num_samples=int(args.num_samples),
                     img_scale=(256, 128),
                     img_norm_cfg=None,
-                    match_score_thr=2.0,
-                    match_iou_thr=0.2),
+                    match_score_thr=float(args.match_score_threshold),
+                    match_iou_thr=float(args.match_iou_threshold)),
                 momentums=None,
                 num_frames_retain=10)
         )
