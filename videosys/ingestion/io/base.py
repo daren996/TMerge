@@ -49,21 +49,24 @@ class VideoSource(Source):
 
     def cleanup(self):
         self.__video.release()
-
+    
 class ImageSource(Source):
     def __init__(self, folder):
         self.folder = folder
         super(ImageSource, self).__init__()
 
-    def prepare(self):
-        # read images.
+    def read_image_folder(self, folder):
         images = []
-        for root, _, files in os.walk(self.folder):
+        for root, _, files in os.walk(folder):
             for file in files:
                 images.append((os.path.join(root, file), int(file[:file.index('.')])))
-        self.images = images
         # sort images.
-        self.images.sort(key=cmp_to_key(lambda x1, x2: x1[1] - x2[1]))
+        images.sort(key=cmp_to_key(lambda x1, x2: x1[1] - x2[1]))
+        return images
+
+    def prepare(self):
+        # read images.
+        self.images = self.read_image_folder(self.folder)
         self.context.put(fields.META_IMAGE, data.ImageFolderMeta(len(self.images), self.folder))
         self.current = 0
 
@@ -81,6 +84,22 @@ class ImageSource(Source):
     
     def has_next(self):
         return self.current +1 < len(self.images)
+
+class ConcatMultiImageSource(ImageSource):
+    def __init__(self, folder_list):
+        self.folder_list = folder_list
+        super().__init__(None)
+    
+    def prepare(self):
+        # read images
+        images_list = []
+        for folder in self.folder_list:
+            images = self.read_image_folder(folder)
+            images_list +=images
+        self.images = images_list
+        self.context.put(fields.META_IMAGE, 
+            data.ImageFolderMeta(len(self.images), self.folder_list))
+        self.current = 0
     
 # =============== sink operators
     
