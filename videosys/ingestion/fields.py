@@ -28,6 +28,9 @@ DATA_OBJECT_TRACK = 'obj_track'
 
 DATA_OBJECT_TRACK_GT = 'obj_track_gt'
 
+# track with features
+DATA_TRACK_FEAT = 'track_feat'
+
 # detection result image - produced by visualization operators
 DATA_FRAME_DETECTION = 'frame_obj_det'
 

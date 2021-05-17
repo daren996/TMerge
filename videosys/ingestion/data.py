@@ -1,7 +1,7 @@
 '''
 data classes
 '''
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # ============= meta classes
 @dataclass
@@ -49,4 +49,10 @@ class ObjectTrackingResult:
 class SOTResult:
     bbox: list
     score: float
+    
+@dataclass
+class TrackFeature:
+    uid: int
+    bbox: list 
+    feature: list
     
