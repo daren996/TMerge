@@ -40,3 +40,6 @@ pip install tf_slim
 
 # for excel output
 pip install openpyxl
+
+# for deep-person-reid
+pip install gdown

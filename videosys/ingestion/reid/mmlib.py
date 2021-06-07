@@ -1,14 +1,11 @@
-from videosys.ingestion.data import TrackFeature
 import torch
 import torch.nn.functional as F
-import os
-import numpy as np
-import pandas as pd
 from mmtrack.models.reid.base_reid import BaseReID
+from videosys.ingestion.data import TrackFeature
 from videosys.ingestion.base import Operator
 from videosys.ingestion import fields
 
-class ExtractFeature(Operator):
+class MMLibExtractFeature(Operator):
     def __init__(self, backbone, neck, head, img_scale = None, rescale = False):
         super().__init__()
         self.img_scale = img_scale
@@ -99,36 +96,3 @@ class ExtractFeature(Operator):
             return torch.cat(crop_imgs, dim=0)
         else:
             return img.new_zeros((0, ))
-
-
-class TrackFeatureSink(Operator):
-    def __init__(self, file_path):
-        super().__init__()
-        self.file_path = file_path
-        parent_folder = os.path.dirname(file_path)
-        if not os.path.isdir(parent_folder):
-            os.makedirs(parent_folder)
-        self.data = []
-        self.head = ['fid', 'left', 'top', 'right', 'bottom', 'id', 'label', 'score', 'feature']
-
-    def process(self, tables):
-        frame_id = tables[fields.DATA_FRAME_ID]
-        tracks = tables[fields.DATA_OBJECT_TRACK]
-        track_feats = tables[fields.DATA_TRACK_FEAT]
-
-        # save as numpy array: [fid, bboxes, id, label, score]
-        track_dict = dict()
-        for track in tracks:
-            track_dict[track.uid] = track
-        
-        for track_f in track_feats:
-            track = track_dict[track_f.uid]
-            # print(track_f.feature.get_device())
-            self.data.append([frame_id, *track_f.bbox, track_f.uid, \
-                track.label, track.confidence, [track_f.feature]])
-
-        self.collector.emit(tables)
-        
-    def cleanup(self):
-        df = pd.DataFrame(data = np.array(self.data), columns = self.head)
-        df.to_pickle(self.file_path)

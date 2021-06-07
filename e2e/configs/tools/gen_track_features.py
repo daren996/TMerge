@@ -1,6 +1,7 @@
 from videosys.ingestion.compat.mmlib import MMLibCompatable, MMLibMoveData, MMMultiScaleFlipAug
 from videosys.ingestion.io.loaders import MOTResultLoader
-from videosys.ingestion.inspector.loaders import ExtractFeature, TrackFeatureSink
+from videosys.ingestion.reid.io import TrackFeatureSink
+from videosys.ingestion.reid.mmlib import MMLibExtractFeature
 from videosys.ingestion.observer.reporter import ProgressReporter
 from e2e.configs.utils import create_source_for_path
 
@@ -26,7 +27,7 @@ def operators(args):
             dict(type='Collect', keys=['img'])
         ], img_scale=(1088, 1088), flip=False),
         MMLibMoveData(),
-        ExtractFeature(
+        MMLibExtractFeature(
                 backbone=dict(
                     type='ResNet',
                     depth=50,

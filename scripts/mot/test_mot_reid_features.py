@@ -137,7 +137,6 @@ def test_dataset(dataset):
             with open(output_path, 'w') as f:
                 f.write('\n'.join(output_content))
 
-
 if __name__ == '__main__':
     # fp='../storage/results/mot17/MOT17-11-DPM/faster_rcnn-deepsort-person-feat.pkl'
     # gt_ = '../storage/dataset/MOT17/train/MOT17-11-DPM/gt/gt.txt'
@@ -152,3 +151,4 @@ if __name__ == '__main__':
     test_dataset('MOT17-09-DPM')
     test_dataset('MOT17-11-DPM')
     test_dataset('MOT17-13-DPM')
+

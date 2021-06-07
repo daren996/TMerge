@@ -18,8 +18,8 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-# init-hook=
-init-hook='import sys; sys.path.append("./")'
+; init-hook=
+init-hook="import imp, os; from pylint.config import find_pylintrc; imp.load_source('import_hook', os.path.join(os.path.dirname(find_pylintrc()), 'import_hook.py'))"
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
@@ -148,7 +148,9 @@ disable=print-statement,
         trailing-whitespace,
         too-many-arguments,
         cell-var-from-loop,
-        not-callable
+        not-callable,
+        no-name-in-module,
+        import-error,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
