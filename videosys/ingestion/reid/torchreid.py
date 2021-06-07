@@ -28,6 +28,12 @@ class TorchReIdFeatureExtracor(Operator):
         for track in tracks:
             bboxes.append(track.bbox)
             ids.append(track.uid)
+
+        if len(bboxes) == 0:
+            tables[fields.DATA_TRACK_FEAT] = []
+            self.collector.emit(tables)
+            return
+            
         bboxes = torch.tensor(bboxes)
 
         bboxes[:, 0::2] = torch.clamp(bboxes[:, 0::2], min=0, max=len(image[0]))

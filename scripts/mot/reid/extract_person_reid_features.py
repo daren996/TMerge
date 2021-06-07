@@ -29,5 +29,5 @@ def extract_features_for_dataset(dataset):
 
 if __name__ == '__main__':
     # extract_features_for_dataset('MOT17-09-DPM')
-    extract_features_for_dataset('MOT17-11-DPM')
-    # extract_features_for_dataset('MOT17-13-DPM')
+    # extract_features_for_dataset('MOT17-11-DPM')
+    extract_features_for_dataset('MOT17-13-DPM')

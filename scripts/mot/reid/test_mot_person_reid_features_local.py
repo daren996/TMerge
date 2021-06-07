@@ -187,6 +187,7 @@ def simple_test(dataset, method, reid_network):
         f.write('\n'.join(outputs))
 
 def test_dataset(dataset):
+    print('processing dataset', dataset)
     methods = ['sort', 'deepsort', 'tracktor']
     reid_models = ['osnet_x1_0', 'resnet50_fc512']
 
@@ -196,5 +197,7 @@ def test_dataset(dataset):
 
 if __name__ == '__main__':
     # simple_test('MOT17-11-DPM', 'deepsort', 'osnet_x1_0')
-    test_dataset('MOT17-11-DPM')
+    # test_dataset('MOT17-11-DPM')
+    test_dataset('MOT17-09-DPM')
+    test_dataset('MOT17-13-DPM')
     
