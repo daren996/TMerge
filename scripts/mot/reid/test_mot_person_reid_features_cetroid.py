@@ -1,6 +1,7 @@
 from collections import defaultdict
 import os
 import pandas as pd
+import numpy as np
 from cv2 import cv2
 from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
@@ -56,28 +57,43 @@ def produce_track_distance(pkl_file_path, gt_file, track_file):
         # key: other_hid, value: (distance, hid_frame, other_hid_frame)
         track_pair_distance_dict = dict()
 
+        # for all intervals, retrieve images
         for [_interval_start, _interval_end] in hid_intervals:
             _start_feature = feat_data.loc[(feat_data['fid'] == _interval_start) \
                 & (feat_data['id'] == hid)].iloc[0]['feature'][0].numpy()
 
             tracks_in_current_frame = set(feat_data.loc[feat_data['fid'] == \
                 _interval_start]['id'].tolist())
+
             # use interval_start 
             appeared_track_table = feat_data.loc[(feat_data['fid'] < _interval_start) \
                 & (~feat_data['id'].isin(tracks_in_current_frame))]
 
-            # get the last row of each track.
-            appeared_track_table = appeared_track_table.loc[\
-                appeared_track_table.groupby('id')['fid'].idxmax()]
-
+            # get the centroid of this track.
+            appeared_ids = appeared_track_table['id'].unique()
+            
+            id_and_feat_dict = dict()
+            for other_hid in appeared_ids:
+                # get features
+                this_hid_table = appeared_track_table.loc[appeared_track_table['id'] == other_hid]
+                if len(this_hid_table) <= 0:
+                    continue
+                _feats = [x[0].numpy() for x in this_hid_table['feature']]
+                _fids = [x for x in this_hid_table['fid']]
+                _centroid = np.mean(_feats, axis=0)
+                # find the closest one.
+                _distances = pairwise_distances(_feats, [_centroid]).ravel()
+                # find the minimum distance.
+                _min_feat, _min_dist, _fid = min(zip(_feats, _distances, _fids), key=lambda x: x[1])
+                id_and_feat_dict[other_hid] = (_min_feat, _fid)
+            
             # loop other tracks
-            for idx, track_row in appeared_track_table.iterrows():
-                _feature = track_row['feature'][0].numpy()
+            for _key, (_feature, _fid) in id_and_feat_dict.items():
                 _distance = pairwise_distances([_start_feature], [_feature])[0][0]
-                _key = track_row['id']
+
                 if _key not in track_pair_distance_dict or \
                         track_pair_distance_dict[_key][0] > _distance:
-                    track_pair_distance_dict[_key] = (_distance, _interval_start, track_row['fid'])
+                    track_pair_distance_dict[_key] = (_distance, _interval_start, _fid)
             
             # compute end_feature
             _end_feature = feat_data.loc[(feat_data['fid'] == _interval_end) \
@@ -88,18 +104,34 @@ def produce_track_distance(pkl_file_path, gt_file, track_file):
 
             future_track_table = feat_data.loc[(feat_data['fid'] > _interval_end) \
                 & (~feat_data['id'].isin(tracks_in_current_frame))]
-            # get the first row of each track
-            future_track_table = future_track_table.loc[\
-                future_track_table.groupby('id')['fid'].idxmin()]
             
-            for idx, track_row in future_track_table.iterrows():
-                _feature = track_row['feature'][0].numpy()
+            future_ids = future_track_table['id'].unique()
+
+            id_and_feat_dict = dict()
+            for other_hid in future_ids:
+                # get features
+                this_hid_table = future_track_table.loc[future_track_table['id'] == other_hid]
+                if len(this_hid_table) <= 0:
+                    continue
+                _feats = [x[0].numpy() for x in this_hid_table['feature']]
+                _fids = [x for x in this_hid_table['fid']]
+                _centroid = np.mean(_feats, axis=0)
+                # find the closest one.
+                _distances = pairwise_distances(_feats, [_centroid]).ravel()
+                # find the minimum distance.
+                _min_feat, _min_dist, _fid = min(zip(_feats, _distances, _fids), key=lambda x: x[1])
+                id_and_feat_dict[other_hid] = (_min_feat, _fid)
+
+            # loop other tracks
+            for _key, (_feature, _fid) in id_and_feat_dict.items():
                 _distance = pairwise_distances([_end_feature], [_feature])[0][0]
-                _key = track_row['id']
+
                 if _key not in track_pair_distance_dict or \
                         track_pair_distance_dict[_key][0] > _distance:
-                    track_pair_distance_dict[_key] = (_distance, _interval_end, track_row['fid'])
+                    track_pair_distance_dict[_key] = (_distance, _interval_end, _fid)
 
+            # import sys
+            # sys.exit(0)
         id_distance_tuples = []
         for _k, _v in track_pair_distance_dict.items():
             id_distance_tuples.append([_k, _v[0], _v[1], _v[2]])
@@ -292,14 +324,14 @@ def simple_test(dataset, method, reid_network):
     method_result_template = '../storage/results/mot17/{}/faster_rcnn-{}-person.txt'
     feat_template = '../storage/results/mot17/{}/feats-raw/faster_rcnn-{}-person-feat-{}.pkl'
     # feat_template = '../storage/results/mot17/{}/faster_rcnn-{}-person-feat.pkl'
-    result_path = '../storage/results/mot17/{}/reid-feat-person/{}-{}-local.txt'
+    result_path = '../storage/results/mot17/{}/reid-feat-person/{}-{}-centroid.txt'
 
     frame_path_template = '../storage/dataset/MOT17/train/'+dataset+'/img1/{:06d}.jpg'
-    image_result_path = '../storage/results/mot17/{}/reid-feat-person-images/{}-{}-local/'
+    image_result_path = '../storage/results/mot17/{}/reid-feat-person-images/{}-{}-centroid/'
 
     filtered_method_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
-    filtered_result_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-local.txt'
-    filtered_image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-local/'
+    filtered_result_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-centroid.txt'
+    filtered_image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-centroid/'
     filtered_feat_template ='../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}.pkl'
 
     result_path = filtered_result_path
@@ -316,6 +348,7 @@ def simple_test(dataset, method, reid_network):
                 feat_template.format(dataset, method , reid_network), 
                 gt_template.format(dataset),
                 method_result_template.format(dataset, method, reid_network))
+    
     end = time.process_time()
     print('time used', end - start)
 

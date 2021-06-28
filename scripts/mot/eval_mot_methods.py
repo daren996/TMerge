@@ -20,6 +20,8 @@ def eval_all_methods(dataset):
     )
 
 if __name__ == '__main__':
-    eval_all_methods('MOT17-09-DPM')
-    eval_all_methods('MOT17-11-DPM')
-    eval_all_methods('MOT17-13-DPM')
+    # eval_all_methods('MOT17-09-DPM')
+    # eval_all_methods('MOT17-11-DPM')
+    # eval_all_methods('MOT17-13-DPM')
+    eval_all_methods('MOT17-02-DPM')
+    eval_all_methods('MOT17-04-DPM')

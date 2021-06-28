@@ -185,6 +185,8 @@ def test_dataset(dataset):
 if __name__ == '__main__':
     # simple_test('MOT17-11-DPM', 'deepsort', 'osnet_x1_0')
     # test_dataset('MOT17-11-DPM')
-    test_dataset('MOT17-09-DPM')
-    test_dataset('MOT17-13-DPM')
+    # test_dataset('MOT17-09-DPM')
+    # test_dataset('MOT17-13-DPM')
+    test_dataset('MOT17-02-DPM')
+    test_dataset('MOT17-04-DPM')
     

@@ -36,6 +36,8 @@ def run_all_methods(dataset_name):
         # print(' '.join(tokens))
 
 if __name__ == '__main__':
-    run_all_methods('MOT17-09-DPM')
-    run_all_methods('MOT17-11-DPM')
-    run_all_methods('MOT17-13-DPM')
+    # run_all_methods('MOT17-09-DPM')
+    # run_all_methods('MOT17-11-DPM')
+    # run_all_methods('MOT17-13-DPM')
+    run_all_methods('MOT17-02-DPM')
+    run_all_methods('MOT17-04-DPM')
