@@ -133,3 +133,11 @@ python e2e/ingestion_runner.py e2e/configs/tools/gen_mot_result_video.py \
     --output_name MOT17-13-faster_rcnn \
     --fps 25 --thickness 2 --font_scale 0.5
 ```
+
+
+generate videos from images
+
+python e2e/ingestion_runner.py e2e/configs/tools/gen_video_from_images.py \
+    --folder ../storage/dataset/MOT17/train/MOT17-11-DPM/img1/ \
+    --output_folder /media/ytchen/hdd/dataset/videos \
+    --output_name MOT17-11-DPM --fps 30

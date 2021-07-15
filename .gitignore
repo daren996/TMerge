@@ -5,3 +5,5 @@ result/
 data/
 models/
 **/output/
+log/
+reid-data/

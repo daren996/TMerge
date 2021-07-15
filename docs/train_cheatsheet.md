@@ -16,3 +16,8 @@ train, e.g.:
 ```
 python tools/train.py configs/det/faster-rcnn_r50_fpn_4e_mot17-half.py
 ```
+
+
+## Train reid model
+
+```python ./videosys/train/reid/train_reid.py --config-file config/train/reid/mot_osnet_x1_0_softmax_256x128_amsgrad.yaml```
