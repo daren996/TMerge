@@ -43,3 +43,6 @@ pip install openpyxl
 
 # for deep-person-reid
 pip install gdown
+
+# for h264 support
+conda install -c conda-forge openh264
