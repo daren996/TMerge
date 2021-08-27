@@ -17,7 +17,9 @@ default_args = dict(
     obj_score_threshold='0.5',
     match_iou_threshold='0.5',
     num_samples='10',
-    match_score_threshold='2.0'
+    match_score_threshold='2.0',
+    save_type=False,
+    detect_classes='',
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -35,7 +37,9 @@ def operators(args):
             dict(type='VideoCollect', keys=['img'])
         ], img_scale=(1088, 1088), flip=False),
         MMLibMoveData(),
-        MMDetDetectorWithFeatures(config_file = args.config, checkpoint_file=args.checkpoint),
+        MMDetDetectorWithFeatures(config_file = args.config, checkpoint_file=args.checkpoint, 
+            detect_classes=None if len(args.detect_classes) == 0 else \
+                args.detect_classes.replace('_',' ').split(',')),
         MMTrackingTracktor(
             pretrains=dict(
                 # pylint: disable=line-too-long
@@ -81,7 +85,7 @@ def operators(args):
         )
     ]
     if not args.output == '':
-        ops.append(MOTResultSink(args.output))
+        ops.append(MOTResultSink(args.output, add_type_column=args.save_type))
     if args.display:
         ops.append(ObjectTrackingVisualizer(display=True))
     ops.append(ProgressReporter(save_file = args.output+'.report' 

@@ -123,16 +123,18 @@ class MMTrackingTracktor(Operator):
         bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections]).cuda()
         labels_tensor = torch.tensor([d.label for d in detections])
 
-        with torch.no_grad():
-            # convert tensor results to np.array
-            bboxes, labels, ids = self.tracker.track(img, img_meta, 
-                self.model, x, bboxes_tensor, labels_tensor, fid, rescale=True)
-        tracking_result = track2result(bboxes, labels, ids, num_classes)
-        bboxes, labels, ids = restore_result(tracking_result, return_ids=True)
-        
         result = []
-        for bbox, label, uid in zip(bboxes, labels, ids):
-            result.append(ObjectTrackingResult(uid, label, bbox[:4], bbox[4]))
+        # only proceed when len(bbox) > 0
+        if len(bboxes_tensor) > 0:
+            with torch.no_grad():
+                # convert tensor results to np.array
+                bboxes, labels, ids = self.tracker.track(img, img_meta, 
+                    self.model, x, bboxes_tensor, labels_tensor, fid, rescale=True)
+        
+            tracking_result = track2result(bboxes, labels, ids, num_classes)
+            bboxes, labels, ids = restore_result(tracking_result, return_ids=True)
+            for bbox, label, uid in zip(bboxes, labels, ids):
+                result.append(ObjectTrackingResult(uid, label, bbox[:4], bbox[4]))
         # print(result[-1])
         tables[fields.DATA_OBJECT_TRACK] = result
         self.collector.emit(tables)

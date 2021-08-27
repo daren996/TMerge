@@ -12,6 +12,9 @@ default_args = dict(
     # pylint: disable=line-too-long
     checkpoint_file = '../mmdetection/checkpoints/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_bbox_mAP-0.408__segm_mAP-0.37_20200504_163245-42aa3d00.pth',
     threshold='0.5',
+    display=False,
+    no_report_save=False,
+    output=None,
 )
 
 def operators(args):

@@ -22,3 +22,20 @@ Then install opencv `conda install opencv`
 If you execute `ffmpeg` in the current environment(with `conda` activated), you should able to find the following tokens in the configuration `--enabled-libx264 --enable-libopenh264`.
 
 Reference: https://github.com/conda-forge/opencv-feedstock/issues/230#issuecomment-626293053
+
+* No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda-10.2'
+
+Check pytorch 
+
+```
+python
+>>> import torch
+>>> torch.cuda.is_available()
+```
+
+If the above returns `False`, then try to install gpu version.
+
+`conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch`
+
+also check if there is any pytorch-cpu version, and uninstall it.
+`pip uninstall pytorch-cpu`, `conda uninstall pytorch-cpu`

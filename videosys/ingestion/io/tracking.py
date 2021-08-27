@@ -54,8 +54,9 @@ class TrackResultFolderSink(AbstractTrackResultSink):
 
 
 class MOTResultSink(AbstractTrackResultSink):
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, add_type_column=False, **kwargs):
         self.output_path = path
+        self.add_type_column = add_type_column
         super().__init__(**kwargs)
 
     def prepare(self):
@@ -71,8 +72,14 @@ class MOTResultSink(AbstractTrackResultSink):
     def store(self, fid, track_results):
         with open(self.file_path, 'a+') as f:
             for t in track_results:
-                f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}'
-                    .format(fid, t.uid, t.bbox[0], t.bbox[1], 
-                    t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1], 
-                    t.confidence, -1, -1, -1))
+                if self.add_type_column:
+                    f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{},{}'
+                        .format(fid, t.uid, t.bbox[0], t.bbox[1], 
+                        t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1], 
+                        t.confidence, t.label, -1, -1, -1))
+                else:
+                    f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}'
+                        .format(fid, t.uid, t.bbox[0], t.bbox[1], 
+                        t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1], 
+                        t.confidence, -1, -1, -1))
                 f.write('\n')
