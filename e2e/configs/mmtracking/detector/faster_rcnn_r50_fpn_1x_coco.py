@@ -12,5 +12,5 @@ model = dict(
     rpn_head=dict(bbox_coder=dict(clip_border=False)),
     roi_head=dict(
         bbox_head=dict(bbox_coder=dict(
-            clip_border=False), num_classes=80))
+            clip_border=False), num_classes=80)),
 )

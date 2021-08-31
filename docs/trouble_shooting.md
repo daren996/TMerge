@@ -39,3 +39,13 @@ If the above returns `False`, then try to install gpu version.
 
 also check if there is any pytorch-cpu version, and uninstall it.
 `pip uninstall pytorch-cpu`, `conda uninstall pytorch-cpu`
+
+* Errors from mmcv lib.
+
+e.g., `border_align_forward miss in moudle _ext`.
+
+This may due to the incompatible versions of mmcv python lib and c++ runetime. Please ensure that the mmcv is installed properly for both python and c++.
+
+For install guide, please refer to https://github.com/open-mmlab/mmcv#installation
+
+Reference: https://github.com/open-mmlab/mmdetection/issues/5541

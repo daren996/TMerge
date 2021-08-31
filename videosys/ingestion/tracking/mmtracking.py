@@ -121,7 +121,7 @@ class MMTrackingTracktor(Operator):
         img = data['img'][0]
             
         bboxes_tensor = torch.tensor([[*d.bbox, d.confidence] for d in detections]).cuda()
-        labels_tensor = torch.tensor([d.label for d in detections])
+        labels_tensor = torch.tensor([d.label for d in detections]).cuda()
 
         result = []
         # only proceed when len(bbox) > 0

@@ -22,3 +22,11 @@ The parent folder structure:
 
 For models and checkpoints from `mmdetection` project, please download to the corresponding folders mannually before use.
 
+
+**Requiremments for dependencies**
+Please use the following versions:
+
+mmcv: >=1.3.8, <1.4
+torch: 1.9
+mmdetection: tags/2.15.1
+mmtracking: the forked version, branch: v0.6.0-mod
