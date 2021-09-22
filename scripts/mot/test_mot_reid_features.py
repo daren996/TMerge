@@ -1,5 +1,7 @@
 from collections import defaultdict
 import os
+import sys
+sys.path.append('.')
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors, NearestCentroid
@@ -137,7 +139,8 @@ def test_dataset(dataset):
             with open(output_path, 'w') as f:
                 f.write('\n'.join(output_content))
 
-if __name__ == '__main__':
+
+if __name__ == '__main__':    
     # fp='../storage/results/mot17/MOT17-11-DPM/faster_rcnn-deepsort-person-feat.pkl'
     # gt_ = '../storage/dataset/MOT17/train/MOT17-11-DPM/gt/gt.txt'
     # method_ = '../storage/results/mot17/MOT17-11-DPM/faster_rcnn-deepsort-person.txt'
@@ -148,7 +151,9 @@ if __name__ == '__main__':
     #     # lambda x: extract_ids_and_feats_pick_one(x, pick_last_func)
     # )
     # print('\n'.join(format_results_for_output(*results)))
-    test_dataset('MOT17-09-DPM')
+
+    # test_dataset('MOT17-04-DPM')
+    # test_dataset('MOT17-09-DPM')
     test_dataset('MOT17-11-DPM')
-    test_dataset('MOT17-13-DPM')
+    # test_dataset('MOT17-13-DPM')
 

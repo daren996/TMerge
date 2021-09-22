@@ -2,6 +2,7 @@
 # extract reid features.
 import os
 
+
 def extract_features_for_dataset(dataset):
     # result_template = '../storage/results/mot17/{}/faster_rcnn-{}-person.txt'
     data_path_template = '../storage/dataset/MOT17/train/{}/img1'
@@ -26,8 +27,9 @@ def extract_features_for_dataset(dataset):
         print('executing command: ', command)
         os.system(command)
 
+
 if __name__ == '__main__':
-    extract_features_for_dataset('MOT17-04-DPM')
-    extract_features_for_dataset('MOT17-09-DPM')
-    # extract_features_for_dataset('MOT17-11-DPM')
+    # extract_features_for_dataset('MOT17-04-DPM')
+    # extract_features_for_dataset('MOT17-09-DPM')
+    extract_features_for_dataset('MOT17-11-DPM')
     # extract_features_for_dataset('MOT17-13-DPM')

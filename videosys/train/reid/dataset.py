@@ -81,10 +81,9 @@ class RedefinedDataset(Dataset):
 
 
 class MOTDataset(RedefinedDataset):
-    
-    
+
     train_sequences = ['MOT17-02', 'MOT17-04', 'MOT17-05', 'MOT17-09',
-                        'MOT17-10', 'MOT17-11', 'MOT17-13']
+                       'MOT17-10', 'MOT17-11', 'MOT17-13']
     dataset_url = None
 
     def __init__(self, root='', mot_vis_threshold=0.3, mot_exclude_sequences=[], **kwargs):

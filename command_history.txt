@@ -17,6 +17,7 @@ pip install terminaltables mmpycocotools
 pip install lap scipy filterpy
 # for viou tracker
 pip install lapsolver
+#conda install -c loopbio lapsolver
 # for Deep SORT, or install tensorflow (CUDA 10.1 compatiable)
 pip install tensorflow==2.3.0
 # for CenterNet
@@ -46,3 +47,7 @@ pip install gdown
 
 # for h264 support
 conda install -c conda-forge openh264
+
+
+# for convinence 
+pip install colored-traceback

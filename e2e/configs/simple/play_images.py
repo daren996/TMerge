@@ -7,7 +7,7 @@ from videosys.ingestion.io.base import ImageSource
 description = "play images from folder"
 
 default_args = dict(
-    folder='../storage/dataset/2DMOT2015/test/ADL-Rundle-1/img1',
+    folder='../storage/dataset/MOT17/train/MOT17-02-DPM/img1',
     no_auto_play=False
 )
 

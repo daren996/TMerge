@@ -1,5 +1,7 @@
 from collections import defaultdict
 import os
+import sys 
+sys.path.append('.')
 import pandas as pd
 import numpy as np
 from cv2 import cv2
@@ -448,10 +450,10 @@ if __name__ == '__main__':
     # test_dataset('MOT17-04-DPM')
     # simple_test('MOT17-02-DPM', 'deepsort', 'osnet_x1_0')
     # simple_test('MOT17-04-DPM', 'deepsort', 'osnet_x1_0')
-    simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-    simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
+    # simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
+    # simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
+    # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
+    # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
     simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
     simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
     # simple_test('MOT17-04-DPM', 'tracktor', 'default', 'avg', 'mot1')

@@ -48,6 +48,12 @@ python e2e/ingestion_runner.py e2e/configs/tracking/uma_private.py \
     --checkpoint https://download.openmmlab.com/mmtracking/mot/faster_rcnn/faster-rcnn_r50_fpn_4e_mot17-half-64ee2ed4.pth \
     --output ../storage/results/mot17/MOT17-11-DPM-faster_rcnn-uma-person.txt
 ```
+
+centertrack
+```
+python e2e/ingestion_runner.py e2e/configs/tracking/centertrack_private.py
+```
+
 # sot
 ```
 python e2e/ingestion_runner.py e2e/configs/sot/mmt_pipeline_siamese_rpn.py

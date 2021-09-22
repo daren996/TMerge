@@ -16,8 +16,8 @@ class TorchReIdFeatureExtracor(Operator):
         self.device = device
     
     def prepare(self):
-        self.extractor = FeatureExtractor(model_name = self.model_name,\
-            model_path = self.model_path, device = self.device)
+        self.extractor = FeatureExtractor(model_name = self.model_name, 
+                                          model_path = self.model_path, device = self.device)
     
     def process(self, tables):
         image = tables[fields.DATA_FRAME]
