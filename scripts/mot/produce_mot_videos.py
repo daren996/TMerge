@@ -8,11 +8,11 @@ def produce_all_videos(dataset_name, fps, thickness, font_scale):
     output_template = '../storage/results/mot17/{dataset_name}/videos'
     
     method_list = [
-        ('sort', 'faster_rcnn'), 
-        ('deepsort', 'faster_rcnn'),
+        # ('sort', 'faster_rcnn'), 
+        # ('deepsort', 'faster_rcnn'),
         ('tracktor', 'faster_rcnn'), 
-        ('uma', 'faster_rcnn'),
-        ('center_track', 'center_net')
+        # ('uma', 'faster_rcnn'),
+        # ('center_track', 'center_net')
     ]
 
     common_args = [
@@ -47,6 +47,10 @@ def produce_all_videos(dataset_name, fps, thickness, font_scale):
     os.system(command)
 
 if __name__ == '__main__':
+    produce_all_videos('MOT17-02-DPM', '30', '2', '0.5')
+    produce_all_videos('MOT17-04-DPM', '30', '3', '0.7')
+    produce_all_videos('MOT17-05-DPM', '14', '2', '0.5')
     produce_all_videos('MOT17-09-DPM', '30', '2', '0.5')
+    produce_all_videos('MOT17-10-DPM', '30', '2', '0.5')
     produce_all_videos('MOT17-11-DPM', '30', '3', '0.7')
     produce_all_videos('MOT17-13-DPM', '25', '2', '0.5')

@@ -454,14 +454,18 @@ if __name__ == '__main__':
     # simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
     # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
     # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-    simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
+    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
+    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
     # simple_test('MOT17-04-DPM', 'tracktor', 'default', 'avg', 'mot1')
     # simple_test('MOT17-04-DPM', 'tracktor', 'default', 'median', 'mot1')
     # simple_test('MOT17-09-DPM', 'tracktor', 'default', 'avg', 'mot1')
     # simple_test('MOT17-09-DPM', 'tracktor', 'default', 'median', 'mot1')
     # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg')
     # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median')
+
+    for did in ['13', '11', '10', '09', '05', '04', '02']:
+        simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'median', 'mot3')
+        simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
 
     # arr1 = [[1], [2], [3], [4]]
     # arr2 = [[40], [50], [60], [70]]

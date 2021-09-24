@@ -1,6 +1,6 @@
-import motmetrics as mm
-from cv2 import cv2
 import os 
+from cv2 import cv2
+import motmetrics as mm
 
 def preprocess(dataset, method, obj_frame_threshold=100):
     method_result_template = '../storage/results/mot17/{}/faster_rcnn-{}-person.txt'
@@ -57,11 +57,14 @@ def save_tracked_txt(path, pf):
             ))
     
 
-
-
 if __name__ == '__main__':
     # preprocess('MOT17-04-DPM', 'deepsort')
     # preprocess('MOT17-04-DPM', 'tracktor')
     # preprocess('MOT17-02-DPM', 'deepsort')
-    # preprocess('MOT17-09-DPM', 'tracktor')
+    preprocess('MOT17-02-DPM', 'tracktor')
+    preprocess('MOT17-04-DPM', 'tracktor')
+    preprocess('MOT17-05-DPM', 'tracktor')
+    preprocess('MOT17-09-DPM', 'tracktor')
+    preprocess('MOT17-10-DPM', 'tracktor')
     preprocess('MOT17-11-DPM', 'tracktor')
+    preprocess('MOT17-13-DPM', 'tracktor')

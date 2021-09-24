@@ -1,4 +1,6 @@
 import os
+import sys 
+sys.path.append('.')
 from tools.mot.mot_mapping import generate_summary, load_and_compute_mapping
 
 def produce_result_for_dataset(dataset):
@@ -10,7 +12,8 @@ def produce_result_for_dataset(dataset):
     gt_template = '../storage/dataset/MOT17/train/{}/gt/gt.txt'
     output_template = '../storage/results/mot17/{}/mapping/{}-{}-person.xlsx'
 
-    methods = [('center_track', 'center_net'), 'tracktor', 'sort', 'deepsort', 'uma']
+    # methods = [('center_track', 'center_net'), 'tracktor', 'sort', 'deepsort', 'uma']
+    methods = ['tracktor']
 
     for method in methods:
         if isinstance(method, tuple):
@@ -31,6 +34,10 @@ def produce_result_for_dataset(dataset):
 
 
 if __name__ == '__main__':
+    produce_result_for_dataset('MOT17-02-DPM')
+    produce_result_for_dataset('MOT17-04-DPM')
+    produce_result_for_dataset('MOT17-05-DPM')
     produce_result_for_dataset('MOT17-09-DPM')
+    produce_result_for_dataset('MOT17-10-DPM')
     produce_result_for_dataset('MOT17-11-DPM')
     produce_result_for_dataset('MOT17-13-DPM')

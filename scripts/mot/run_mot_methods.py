@@ -2,6 +2,7 @@
 
 import os
 
+
 def run_all_methods(dataset_name):
     dataset_template = '../storage/dataset/MOT17/train/{dataset_name}/img1'
     model_config = './e2e/configs/mmtracking/detector/faster_rcnn_r50_fpn_one_class.py'
@@ -14,11 +15,11 @@ def run_all_methods(dataset_name):
             '--checkpoint', checkpoint,
     ]
     method_lists = [
-        ('sort', 'mmt_sort_private.py', 'faster_rcnn', params_for_faster_rcnn),
-        ('deepsort','mmt_deepsort_private.py', 'faster_rcnn', params_for_faster_rcnn),
+        # ('sort', 'mmt_sort_private.py', 'faster_rcnn', params_for_faster_rcnn),
+        # ('deepsort','mmt_deepsort_private.py', 'faster_rcnn', params_for_faster_rcnn),
         ('tracktor', 'mmt_tracktor_private.py', 'faster_rcnn', params_for_faster_rcnn),
-        ('uma', 'uma_private.py', 'faster_rcnn', params_for_faster_rcnn),
-        ('center_track', 'centertrack_private.py', 'center_net', [])
+        # ('uma', 'uma_private.py', 'faster_rcnn', params_for_faster_rcnn),
+        # ('center_track', 'centertrack_private.py', 'center_net', [])
     ]
 
     for py in method_lists:
@@ -35,9 +36,12 @@ def run_all_methods(dataset_name):
         os.system(command)
         # print(' '.join(tokens))
 
+
 if __name__ == '__main__':
     run_all_methods('MOT17-02-DPM')
     run_all_methods('MOT17-04-DPM')
+    run_all_methods('MOT17-05-DPM')
     run_all_methods('MOT17-09-DPM')
+    run_all_methods('MOT17-10-DPM')
     run_all_methods('MOT17-11-DPM')
     run_all_methods('MOT17-13-DPM')
