@@ -30,6 +30,7 @@ def attemts_match(dataset, method, reid_network, reid_model_pth_name='pretrained
     dis_path = (dir_path + '{}-{}-dis-{}.txt').format(method, reid_network, reid_model_pth_name)
     match_path = (dir_path + '{}-{}-match-{}.txt').format(method, reid_network, reid_model_pth_name)
     plot_path = (dir_path + '{}-{}-attempts-{}').format(method, reid_network, reid_model_pth_name)
+    dis_all_path = (dir_path + '{}-{}-allavgdis-{}').format(method, reid_network, reid_model_pth_name)
     num_match, match_pairs, avg_dict = 0, [], {}
     with open(match_path, 'r') as f:
         for line in f:
@@ -38,6 +39,7 @@ def attemts_match(dataset, method, reid_network, reid_model_pth_name='pretrained
             hid1, hid2 = line.strip().split('-')[0], line.strip().split('-')[1]
             match_pairs.append('%s-%s' % (hid1, hid2) if int(hid1) <= int(hid2) else '%s-%s' % (hid2, hid1))
             num_match += 1
+    dis_all = []
     with open(dis_path, 'r') as f:
         for line in f:
             if line.strip()[0] == '#':
@@ -46,8 +48,15 @@ def attemts_match(dataset, method, reid_network, reid_model_pth_name='pretrained
             hid1, hid2 = tmp[0].split('-')[0], tmp[0].split('-')[1]
             pairs = '%s-%s' % (hid1, hid2) if int(hid1) <= int(hid2) else '%s-%s' % (hid2, hid1)
             _avg, _median = float(tmp[3]), float(tmp[4])
+            dis_all.append(_avg)
             if pairs not in avg_dict:
                 avg_dict[pairs] = _avg
+    plt.figure()
+    sns.displot(dis_all)
+    plt.title(dataset)
+    plt.xlabel('Avg. Distance')
+    plt.tight_layout()
+    plt.savefig(dis_all_path)
     _x, _y = np.arange(1, num_match + 1, 1), []
     attempts = 0
     for pairs, _avg in sorted(avg_dict.items(), key=lambda x: x[1]):
@@ -122,5 +131,5 @@ focused_hids_dataset = {
 if __name__ == '__main__':
     for did in ['09']:  # '04', '09', '10', '11'
         attemts_match('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'mot3')
-    for did in ['09']:  # '04', '09', '10', '11'
-        samples_distribution('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', reid_model_pth_name='mot3')
+    # for did in ['11']:  # '04', '09', '10', '11'
+    #     samples_distribution('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', reid_model_pth_name='mot3')
