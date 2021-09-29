@@ -1,9 +1,10 @@
 import motmetrics as mm
-from motmetrics.distances import iou_matrix, norm2squared_matrix
+# from motmetrics.distances import iou_matrix, norm2squared_matrix
 from motmetrics.io import Format
 import pandas as pd
 
 
+# link of motmetrics: https://github.com/cheind/py-motmetrics
 def load_and_compute_mapping(file_path, gt_path, dist='iou',  distth=0.5):
     dt = mm.io.loadtxt(file_path, fmt=Format.MOT16)
     gt = mm.io.loadtxt(gt_path, fmt=Format.MOT16)
@@ -18,8 +19,8 @@ def load_and_compute_mapping(file_path, gt_path, dist='iou',  distth=0.5):
     return (results, events_df)
 
 def generate_summary(oid_events, event_df):
-    # oid, duration, hids,  # of hids, # of missing frames, # of hid frames, # of hid frames total
-
+    # oid, duration, # of hids, # of hid frames, # of missing frames, 
+    # # of hid frames, # of hid frames total
     results = []
     for oid, events in oid_events:
         duration = len(events.index.get_level_values('FrameId'))

@@ -214,7 +214,7 @@ def produce_images_for_tracks(additional_info, format_results, hid_result_tuples
         os.makedirs(store_folder)
     
     image_template_selected = '{folder}/{pos}-{hid}-{fid}-{dist:.4f}-SELECTED.jpg'
-    image_template = '{folder}/{pos}-{hid}-{fid}-{dist:.4f}.jpg'
+    image_template = '{folder}/{pos}-{hid}-{fid}-{dist:.4f}g'
 
     def __clamp(x, minimum, maximum):
         return max(minimum, min(x, maximum))

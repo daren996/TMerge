@@ -12,6 +12,9 @@ from sklearn.metrics.pairwise import pairwise_distances
 from sklearn.neighbors import NearestNeighbors
 from tools.mot.mot_mapping import generate_summary, load_and_compute_mapping
 
+plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.autolayout"] = True
+
 def to_intervals(arr):
     _start = arr[0]
     intervals = []
@@ -213,7 +216,7 @@ def produce_track_distance(pkl_file_path, gt_file, track_file, select_method):
     # print(last_fid_rows)
 
 def format_results_for_output(additional_info, format_results, hid_result_tuples_dict, nn):
-    format_output = []
+    format_output, format_out_dis = [], []
     for info, row in zip(additional_info, format_results):
         # skip no matching ids
         if '=>' not in info:
@@ -222,7 +225,17 @@ def format_results_for_output(additional_info, format_results, hid_result_tuples
         format_output.append(''.join([
             '{:<20s}'.format(x) for x in row[:nn+1]
         ]))
-    return format_output
+    format_out_dis.append('# HId1-HId2;min;max;avg;median;std;avg-std;avg+std')
+    for hid, results in hid_result_tuples_dict.items():
+        for _, (other_hid, _, _, _, _distances) in enumerate(results[:nn]):
+            _min = np.min(_distances)
+            _max = np.max(_distances)
+            _average = np.average(_distances)
+            _median = np.median(_distances)
+            _std = np.std(_distances)
+            format_out_dis.append('%s-%s;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f' 
+            % (hid, other_hid, _min, _max, _average, _median, _std, _average-_std, _average+_std))
+    return format_output, format_out_dis
 
 
 def produce_images_for_tracks(additional_info, format_results, hid_result_tuples_dict, \
@@ -342,11 +355,33 @@ def produce_images_for_tracks(additional_info, format_results, hid_result_tuples
             _template = distribution_template_selected if _is_selected else distribution_template
             plot_distribution(_distances, _template.format(
                 folder=hid_folder, pos=pos, hid=other_hid, 
-                selected=_is_selected
-            ))
+                selected=_is_selected), hid, other_hid)
 
         # import sys
         # sys.exit(0)
+
+def plot_distribution(distances, file_path=None, hid=-1, other_hid=-1):
+    snsplot = sns.displot(distances.flatten())
+    fig = snsplot.fig
+    ax = snsplot.ax
+    _min = np.min(distances)
+    _max = np.max(distances)
+    _average = np.average(distances)
+    _median = np.median(distances)
+    _std = np.std(distances)
+    ax.axvline(_average, color='red', linestyle='--', alpha=0.7)
+    ax.axvspan(_average - _std, _average + _std, facecolor='green', alpha=0.2)
+    ax.text(.6, .9, \
+        'min:%.2f;\nmax:%.2f;\navg:%.2f;\nmedian:%.2f;\nstd:%.2f;\navg-std:%.2f;\navg+std:%.2f'
+        % (_min, _max, _average, _median, _std, _average-_std, _average+_std), \
+        verticalalignment='top', horizontalalignment='left', transform = ax.transAxes, fontsize=15)
+    plt.title('HId:%s & HId:%s' % (hid, other_hid))
+    plt.tight_layout()
+    if file_path is None:
+        plt.show()
+    else:
+        fig.savefig(file_path)
+    plt.close(fig)
 
 def simple_test(dataset, method, reid_network, select_method, reid_model_pth_name='pretrained'):
 
@@ -372,8 +407,10 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
     filtered_result_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-pairwise-{}-{}.txt'
     filtered_image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-pairwise-{}-{}/'
     filtered_feat_template ='../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}-{}.pkl'
+    filtered_dis_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-dis-{}.txt'
 
     result_path = filtered_result_path
+    dis_path = filtered_dis_path
     method_result_template = filtered_method_template
     image_result_path = filtered_image_result_path
     feat_template = filtered_feat_template
@@ -392,7 +429,7 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
     end = time.process_time()
     print('time used', end - start)
 
-    outputs = format_results_for_output(a, b, c, 10)
+    outputs, out_dis = format_results_for_output(a, b, c, 10)
 
     # output.
     output_path = result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name)
@@ -401,34 +438,14 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
         os.makedirs(parent_dir)
     with open(output_path, 'w') as f:
         f.write('\n'.join(outputs))
+    # distance file
+    output_dis_path = dis_path.format(dataset, method, reid_network, reid_model_pth_name)
+    with open(output_dis_path, 'w') as f:
+        f.write('\n'.join(out_dis))
     
-    produce_images_for_tracks(a, b, c, 10, \
-        image_result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name), \
-            d, frame_path_template, e, generate_raw_frames=True)
-
-def plot_distribution(distances, file_path=None):
-    snsplot = sns.displot(distances.flatten())
-    fig = snsplot.fig
-    ax = snsplot.ax
-
-    # ax.axis([0, 10, 0, 10])
-    _min = np.min(distances)
-    _max = np.max(distances)
-    _average = np.average(distances)
-    _median = np.median(distances)
-    _std = np.std(distances)
-    ax.axvline(_average, color='red', linestyle='--', alpha=0.7)
-    ax.axvspan(_average - _std, _average + _std, facecolor='green', alpha=0.2)
-    ax.text(.5, .5, \
-        '[{:.2f},{:.2f}];{:.2f}/{:.2f};<{:.2f},{:.2f}>'.format(_min, _max, _average, _median, _average-_std, _average+_std), \
-        verticalalignment='top', horizontalalignment='center', transform = ax.transAxes, fontsize=15)
-    if file_path is None:
-        plt.show()
-    else:
-        fig.savefig(file_path)
-    plt.close(fig)
-    # obtain 
-    # pass
+    # produce_images_for_tracks(a, b, c, 10, \
+    #     image_result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name), \
+    #         d, frame_path_template, e, generate_raw_frames=True)
 
 def test_dataset(dataset):
     print('processing dataset', dataset)
@@ -463,7 +480,7 @@ if __name__ == '__main__':
     # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg')
     # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median')
 
-    for did in ['13', '11', '10', '09', '05', '04', '02']:
+    for did in ['11']:  # '04', '09', '10', '11'
         simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'median', 'mot3')
         simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
 
@@ -471,4 +488,3 @@ if __name__ == '__main__':
     # arr2 = [[40], [50], [60], [70]]
     
     # plot_distribution(pairwise_distances(arr1, arr2))
-    
