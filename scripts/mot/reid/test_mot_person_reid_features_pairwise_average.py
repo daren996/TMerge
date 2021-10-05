@@ -400,7 +400,8 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
     # feat_template = '../storage/results/mot17/{}/faster_rcnn-{}-person-feat.pkl'
     result_path = '../storage/results/mot17/{}/reid-feat-person/{}-{}-pairwise-{}-{}.txt'
 
-    frame_path_template = '../storage/dataset/MOT17/train/'+dataset+'/img1/{:06d}.jpg'
+    frame_path_template = '../storage/dataset/MOT17BGS/train/'+dataset[:-6]+'/img1/{:06d}.jpg'
+    # frame_path_template = '../storage/dataset/MOT17/train/'+dataset+'/img1/{:06d}.jpg'
     image_result_path = '../storage/results/mot17/{}/reid-feat-person-images/{}-{}-pairwise-{}-{}/'
 
     filtered_method_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
@@ -408,7 +409,7 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
     filtered_image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-pairwise-{}-{}/'
     filtered_feat_template ='../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}-{}.pkl'
     filtered_dis_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-dis-{}.txt'
-
+ 
     result_path = filtered_result_path
     dis_path = filtered_dis_path
     method_result_template = filtered_method_template
@@ -443,48 +444,22 @@ def simple_test(dataset, method, reid_network, select_method, reid_model_pth_nam
     with open(output_dis_path, 'w') as f:
         f.write('\n'.join(out_dis))
     
-    # produce_images_for_tracks(a, b, c, 10, \
-    #     image_result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name), \
-    #         d, frame_path_template, e, generate_raw_frames=True)
+    produce_images_for_tracks(a, b, c, 10, \
+        image_result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name), \
+            d, frame_path_template, e, generate_raw_frames=True)
 
 def test_dataset(dataset):
     print('processing dataset', dataset)
     methods = ['sort', 'deepsort', 'tracktor']
     reid_models = ['osnet_x1_0', 'resnet50_fc512']
-
     for method in methods:
         for model in reid_models:
             simple_test(dataset, method, model, 'avg')
             simple_test(dataset, method, model, 'median')
 
 if __name__ == '__main__':
-    # simple_test('MOT17-11-DPM', 'deepsort', 'osnet_x1_0')
-    # simple_test('MOT17-13-DPM', 'deepsort', 'osnet_x1_0')
-    # test_dataset('MOT17-11-DPM')
     # test_dataset('MOT17-09-DPM')
-    # test_dataset('MOT17-13-DPM')
-    # test_dataset('MOT17-02-DPM')
-    # test_dataset('MOT17-04-DPM')
-    # simple_test('MOT17-02-DPM', 'deepsort', 'osnet_x1_0')
-    # simple_test('MOT17-04-DPM', 'deepsort', 'osnet_x1_0')
-    # simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    # simple_test('MOT17-04-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-    # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    # simple_test('MOT17-09-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-    # simple_test('MOT17-04-DPM', 'tracktor', 'default', 'avg', 'mot1')
-    # simple_test('MOT17-04-DPM', 'tracktor', 'default', 'median', 'mot1')
-    # simple_test('MOT17-09-DPM', 'tracktor', 'default', 'avg', 'mot1')
-    # simple_test('MOT17-09-DPM', 'tracktor', 'default', 'median', 'mot1')
-    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'avg')
-    # simple_test('MOT17-11-DPM', 'tracktor', 'osnet_x1_0', 'median')
-
-    for did in ['11']:  # '04', '09', '10', '11'
-        simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-        simple_test('MOT17-%s-DPM' % did, 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
-
-    # arr1 = [[1], [2], [3], [4]]
-    # arr2 = [[40], [50], [60], [70]]
     
-    # plot_distribution(pairwise_distances(arr1, arr2))
+    for did in ['04', '09', '11']:  # '04', '09', '10', '11'
+        simple_test('MOT17-%s-FRCNN' % did, 'tracktor', 'osnet_x1_0', 'median', 'mot3')
+        simple_test('MOT17-%s-FRCNN' % did, 'tracktor', 'osnet_x1_0', 'avg', 'mot3')

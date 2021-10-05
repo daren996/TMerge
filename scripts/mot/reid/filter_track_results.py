@@ -2,9 +2,9 @@ import os
 from cv2 import cv2
 import motmetrics as mm
 
-def preprocess(dataset, method, obj_frame_threshold=100):
+def preprocess(dataset, method, train_test='train', obj_frame_threshold=100):
     method_result_template = '../storage/results/mot17/{}/faster_rcnn-{}-person.txt'
-    dataset_img_path = '../storage/dataset/MOT17/train/{}/img1/{:06d}.jpg'
+    dataset_img_path = '../storage/dataset/MOT17/{}/{}/img1/{:06d}.jpg'
     output_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
 
     # read.
@@ -26,7 +26,7 @@ def preprocess(dataset, method, obj_frame_threshold=100):
         return dt_result
 
     def _filter_bboxes_on_borders(dt_result):
-        frame_template = cv2.imread(dataset_img_path.format(dataset, 1))
+        frame_template = cv2.imread(dataset_img_path.format(train_test, dataset, 1))
         height, width, channels = frame_template.shape
         dt_result = dt_result[
             (dt_result['X'] > 0) & (dt_result['Y'] > 0) &
@@ -50,7 +50,7 @@ def save_tracked_txt(path, pf):
     if not os.path.isdir(parent_dir):
         os.makedirs(parent_dir)
     with open(path, 'w') as f:
-        for idx, row in pf.iterrows():
+        for _, row in pf.iterrows():
             f.write('{:.0f},{:.0f},{},{},{},{},{},{:.0f},{:.0f},-1\n'.format(
                 row['FrameId'], row['Id'], row['X'], row['Y'], row['Width'], 
                 row['Height'],row['Confidence'], row['ClassId'], row['Visibility']
@@ -58,13 +58,19 @@ def save_tracked_txt(path, pf):
     
 
 if __name__ == '__main__':
-    # preprocess('MOT17-04-DPM', 'deepsort')
-    # preprocess('MOT17-04-DPM', 'tracktor')
-    # preprocess('MOT17-02-DPM', 'deepsort')
-    preprocess('MOT17-02-DPM', 'tracktor')
-    preprocess('MOT17-04-DPM', 'tracktor')
-    preprocess('MOT17-05-DPM', 'tracktor')
-    preprocess('MOT17-09-DPM', 'tracktor')
-    preprocess('MOT17-10-DPM', 'tracktor')
-    preprocess('MOT17-11-DPM', 'tracktor')
-    preprocess('MOT17-13-DPM', 'tracktor')
+    # # training set
+    # preprocess('MOT17-02-FRCNN', 'tracktor')  # or deepsort
+    # preprocess('MOT17-04-FRCNN', 'tracktor')
+    # preprocess('MOT17-05-FRCNN', 'tracktor')
+    # preprocess('MOT17-09-FRCNN', 'tracktor')
+    # preprocess('MOT17-10-FRCNN', 'tracktor')
+    # preprocess('MOT17-11-FRCNN', 'tracktor')
+    # preprocess('MOT17-13-FRCNN', 'tracktor')
+    # # test set
+    preprocess('MOT17-01-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-03-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-06-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-07-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-08-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-12-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-14-FRCNN', 'tracktor', train_test='test')

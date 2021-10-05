@@ -21,6 +21,10 @@ DATA_FRAME_META = 'frame_meta'
 
 DATA_OBJECT_DETECTION = 'obj_det'
 
+# background subtracted frame.
+
+DATA_FRAME_BGS = 'frame_bgs'
+
 # feature map.
 DATA_FEATURES = 'feat'
 

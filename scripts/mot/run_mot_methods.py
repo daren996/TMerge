@@ -3,8 +3,8 @@
 import os
 
 
-def run_all_methods(dataset_name):
-    dataset_template = '../storage/dataset/MOT17/train/{dataset_name}/img1'
+def run_all_methods(dataset_name, train_test='train'):
+    dataset_template = '../storage/dataset/MOT17/{train_test}/{dataset_name}/img1'
     model_config = './e2e/configs/mmtracking/detector/faster_rcnn_r50_fpn_one_class.py'
     checkpoint = 'https://download.openmmlab.com/mmtracking/mot/faster_rcnn/faster-rcnn_r50_fpn_4e_mot17-half-64ee2ed4.pth'
     output_template = '../storage/results/mot17/{dataset_name}/{det_method}-{method}-person.txt'
@@ -26,7 +26,7 @@ def run_all_methods(dataset_name):
         name, pyf, det_method, extra_params = py
         tokens = [
             'python', 'e2e/ingestion_runner.py', 'e2e/configs/tracking/'+pyf,
-            '--path', dataset_template.format(dataset_name=dataset_name),
+            '--path', dataset_template.format(train_test=train_test, dataset_name=dataset_name),
             '--output', output_template.format(dataset_name=dataset_name, method=name, det_method=det_method),
             *extra_params
         ]
@@ -38,10 +38,19 @@ def run_all_methods(dataset_name):
 
 
 if __name__ == '__main__':
-    run_all_methods('MOT17-02-DPM')
-    run_all_methods('MOT17-04-DPM')
-    run_all_methods('MOT17-05-DPM')
-    run_all_methods('MOT17-09-DPM')
-    run_all_methods('MOT17-10-DPM')
-    run_all_methods('MOT17-11-DPM')
-    run_all_methods('MOT17-13-DPM')
+    # # training set
+    # run_all_methods('MOT17-02-FRCNN')
+    # run_all_methods('MOT17-04-FRCNN')
+    # run_all_methods('MOT17-05-FRCNN')
+    # run_all_methods('MOT17-09-FRCNN')
+    # run_all_methods('MOT17-10-FRCNN')
+    # run_all_methods('MOT17-11-FRCNN')
+    # run_all_methods('MOT17-13-FRCNN')
+    # # test set
+    run_all_methods('MOT17-01-FRCNN', train_test='test')
+    run_all_methods('MOT17-03-FRCNN', train_test='test')
+    run_all_methods('MOT17-06-FRCNN', train_test='test')
+    run_all_methods('MOT17-07-FRCNN', train_test='test')
+    run_all_methods('MOT17-08-FRCNN', train_test='test')
+    run_all_methods('MOT17-12-FRCNN', train_test='test')
+    run_all_methods('MOT17-14-FRCNN', train_test='test')

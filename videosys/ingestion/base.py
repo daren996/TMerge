@@ -10,6 +10,19 @@ class Collector:
         for operator in self.operators:
             operator.process(tables)
 
+class Context:
+    def __init__(self):
+        self.dict = {}
+
+    def get(self, key):
+        return self.dict[key]
+
+    def put(self, key, value):
+        self.dict[key] = value
+
+    def has(self, key):
+        return key in self.dict
+
 class Operator:
     def __init__(self):
         '''
@@ -43,19 +56,6 @@ class Operator:
 class Source(Operator):
     def has_next(self):
         pass
-
-class Context:
-    def __init__(self):
-        self.dict = {}
-
-    def get(self, key):
-        return self.dict[key]
-
-    def put(self, key, value):
-        self.dict[key] = value
-
-    def has(self, key):
-        return key in self.dict
 
 class PipelineController:
     def __init__(self):

@@ -1,6 +1,7 @@
 # pylint: disable-all
 from videosys.ingestion.reid.io import TrackFeatureSink
 from videosys.ingestion.observer.reporter import ProgressReporter
+from videosys.ingestion.reid.bgs import BackgroundSubtraction
 from videosys.ingestion.reid.torchreid import TorchReIdFeatureExtracor
 from videosys.ingestion.io.loaders import MOTResultLoader
 from e2e.configs.utils import create_source_for_path
@@ -18,6 +19,7 @@ def operators(args):
     ops = [
         create_source_for_path(args.data_path),
         MOTResultLoader(args.result_path),
+        # BackgroundSubtraction(),  # BGS
         TorchReIdFeatureExtracor(args.model_name, args.model_path),
         TrackFeatureSink(args.feature_save_path),
         ProgressReporter()
