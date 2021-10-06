@@ -1,9 +1,11 @@
 from collections import defaultdict
 import os
-import sys 
+import sys
+from joblib.logger import PrintTime 
 sys.path.append('.')
 import pandas as pd
 import numpy as np
+import time
 from cv2 import cv2
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -30,137 +32,100 @@ def to_intervals(arr):
             intervals.append(last_interval)
     return intervals
 
-def produce_track_distance(pkl_file_path, gt_file, track_file, select_method):
-    oid_results, event_df = load_and_compute_mapping(track_file, gt_file)
-    mapping_pd = generate_summary(oid_results, event_df)
-
-    oid_hids = [(x, y) for x, y in zip(mapping_pd['oid'], mapping_pd['hids_detail'])]
-    hid_oids_dict = defaultdict(list)
-    for oid, hids in oid_hids:
-        for hid in hids:
-            hid_oids_dict[hid].append(oid)
-
-    # convert types
+def get_hid_result(pkl_file_path, select_method):
+    hid_result_tuples_dict = dict()  # {hid: [(other_hid, avg/med, fid1, fid2, [dis]), ...]}
+    all_track_pair_distance_dict = dict()  # {hid: {other_hid: (avg/med, fid1, fid2, [dis])}}
     feat_data = pd.read_pickle(pkl_file_path).astype({
-        'fid': 'int32',
-        'id': 'int32',
-    })
-    # filter feat_data 
-
-    # print(feat_data.dtypes)
-
+            'fid': 'int32',
+            'id': 'int32',  # HID, or Tracking ID
+        })
     unique_ids = feat_data['id'].unique()
-
-    format_results = [] 
-    # 3. additional info for each hid.
-    additional_info = []
-    # detailed_additional info
-    detailed_additional_info_dict = dict()
-
-    hid_result_tuples_dict = dict()
-    for hid in unique_ids:
-        # 1. get intervals
+    for hid in unique_ids[:]:
+        # get intervals
         hid_intervals = to_intervals(feat_data.loc[feat_data['id'] == hid]['fid'].tolist())
-
-        # key: other_hid, value: (distance, hid_frame, other_hid_frame)
-        track_pair_distance_dict = dict()
-
-        # for all intervals, retrieve images
+        track_pair_distance_dict = dict()  # {other_hid: (avg/med, fid1, fid2, [dis])}
         for [_interval_start, _interval_end] in hid_intervals:
-            
-            _current_interval_table = feat_data.loc[
+            # get the centroid of this track
+            current_feat_data = feat_data.loc[
                 (feat_data['fid'] >= _interval_start) \
                     & (feat_data['fid'] <= _interval_end) \
                     & (feat_data['id'] == hid)
                 ]
-            _current_interval_features = [x[0].numpy() for x in _current_interval_table['feature']]
-            
-
-            tracks_in_current_frame = set(feat_data.loc[feat_data['fid'] == \
-                _interval_start]['id'].tolist())
-
-            # use interval_start 
-            appeared_track_table = feat_data.loc[(feat_data['fid'] < _interval_start) \
-                & (~feat_data['id'].isin(tracks_in_current_frame))]
-
-            # get the centroid of this track.
-            appeared_ids = appeared_track_table['id'].unique()
-
-            tracks_in_current_frame = set(feat_data.loc[feat_data['fid'] == \
-                _interval_end]['id'].tolist())
-
-            future_track_table = feat_data.loc[(feat_data['fid'] > _interval_end) \
-                & (~feat_data['id'].isin(tracks_in_current_frame))]
-            
-            future_ids = future_track_table['id'].unique()
-            
-            id_and_feat_dict = dict()
+            current_interval_features = [x[0].numpy() for x in current_feat_data['feature']]
+            # get track(s) before start frame
+            tracks_in_start_frame = set(feat_data.loc[feat_data['fid'] == \
+                _interval_start]['id'].tolist())  # hid(s) in start frame
+            appeared_feat_data = feat_data.loc[(feat_data['fid'] < _interval_start) \
+                & (~feat_data['id'].isin(tracks_in_start_frame))]
+            appeared_ids = appeared_feat_data['id'].unique()
+            # get track(s) after end frame
+            tracks_in_end_frame = set(feat_data.loc[feat_data['fid'] == \
+                _interval_end]['id'].tolist())  # hid(s) in start frame
+            future_feat_data = feat_data.loc[(feat_data['fid'] > _interval_end) \
+                & (~feat_data['id'].isin(tracks_in_end_frame))]
+            future_ids = future_feat_data['id'].unique()
+            # get their info
+            id_and_feat_dict = dict()  # {hid: (feats, fids)}
             for other_hid in appeared_ids:
-                # get features
-                this_hid_table = appeared_track_table.loc[appeared_track_table['id'] == other_hid]
+                this_hid_table = appeared_feat_data.loc[appeared_feat_data['id'] == other_hid]
                 if len(this_hid_table) <= 0:
                     continue
                 _feats = [x[0].numpy() for x in this_hid_table['feature']]
-                
                 _fids = [x for x in this_hid_table['fid']]
                 id_and_feat_dict[other_hid] = (_feats, _fids)
-            
             for other_hid in future_ids:
-                # get features
-                this_hid_table = future_track_table.loc[future_track_table['id'] == other_hid]
+                this_hid_table = future_feat_data.loc[future_feat_data['id'] == other_hid]
                 if len(this_hid_table) <= 0:
                     continue
                 _feats = [x[0].numpy() for x in this_hid_table['feature']]
-                
                 _fids = [x for x in this_hid_table['fid']]
                 if other_hid in id_and_feat_dict:
                     id_and_feat_dict[other_hid][0].extend(_feats)
                     id_and_feat_dict[other_hid][1].extend(_fids)
                 else:
                     id_and_feat_dict[other_hid] = (_feats, _fids)
-
             # loop other tracks
             for _key, (_features, _fids) in id_and_feat_dict.items():
-                _distances = pairwise_distances(_current_interval_features, _features)
-                # get average value.
-                if select_method == 'avg':
+                _distances = pairwise_distances(current_interval_features, _features)
+                if select_method == 'avg':  # get average distance
                     _select_distance = np.average(_distances)
-                    # pick the first frame for each track
-                    _row_idx, _col_idx = 0, 0
-                elif select_method == 'median':
+                elif select_method == 'median':  # get median distance
                     _select_distance = np.median(_distances)
-                    _idx = np.argsort(_distances, None)[_distances.size//2]
-                    _row_idx, _col_idx = np.unravel_index(_idx, _distances.shape)
                 else:
-                    print('error: expecting avg or median')
-                    import sys
+                    print('ERROR: Expecting "avg" or "median" for select_method.')
                     sys.exit(-1)
-                _hid_fid = _current_interval_table.iloc[_row_idx]['fid']
+                # _idx = np.argsort(_distances, None)[_distances.size//2]
+                # _row_idx, _col_idx = np.unravel_index(_idx, _distances.shape)
+                _row_idx, _col_idx = np.unravel_index(_distances.argmin(), _distances.shape)
+                _hid_fid = current_feat_data.iloc[_row_idx]['fid']
                 _other_hid_fid = _fids[_col_idx]
-                # _min_distance = np.min(_distances)
-                # _row_idx, _col_idx = np.unravel_index(_distances.argmin(), _distances.shape)
-
-                # print('min pos', hid, _key, _row_idx, _col_idx)
-
                 if _key not in track_pair_distance_dict or \
                         track_pair_distance_dict[_key][0] > _select_distance:
                     track_pair_distance_dict[_key] = (_select_distance, _hid_fid, _other_hid_fid, _distances)
-
                 # draw distance distribution.
-
-
-            # import sys
-            # sys.exit(0)
+        all_track_pair_distance_dict[hid] = track_pair_distance_dict
         id_distance_tuples = []
         for _k, _v in track_pair_distance_dict.items():
             id_distance_tuples.append([_k, _v[0], _v[1], _v[2], _v[3]])
         id_distance_tuples.sort(key= lambda x: x[1])
+        hid_result_tuples_dict[hid] = id_distance_tuples
+    return hid_result_tuples_dict, all_track_pair_distance_dict, feat_data
 
-        # print(id_distance_tuples[:10])
-
-        # o ids.
+def produce_track_distance(gt_file, track_file, hid_result_tuples_dict, all_track_pair_distance_dict):
+    oid_results, event_df = load_and_compute_mapping(track_file, gt_file)
+    mapping_pd = generate_summary(oid_results, event_df)
+    oid_hids = [(x, y) for x, y in zip(mapping_pd['oid'], mapping_pd['hids_detail'])]
+    hid_oids_dict = defaultdict(list)
+    for oid, hids in oid_hids:
+        for hid in hids:
+            hid_oids_dict[hid].append(oid)
+    format_results = [] 
+    additional_info = []
+    detailed_additional_info_dict = dict()
+    for hid in hid_result_tuples_dict:
+        id_distance_tuples = hid_result_tuples_dict[hid]
+        track_pair_distance_dict = all_track_pair_distance_dict[hid]
         oids = hid_oids_dict[hid]
-
         oids_info = []
         detailed_oids_info = []
         for oid in oids:
@@ -183,40 +148,27 @@ def produce_track_distance(pkl_file_path, gt_file, track_file, select_method):
             # print(hids_row, dists_row, hid_distance_type)
             dist_format = ['{:.0f}:{}/{:.4f}'.format(x,z, y) \
                 for x, y, z in zip(hids_row, dists_row, hid_distance_type)]
-            
             if len(hids_row) > 1:
                 detailed_oids_info.append((oid, [(x, y, z) \
                     for x, y, z in zip(hids_row, dists_row, hid_distance_type)]))
-
             if len(hids_row) > 1:
                 oids_info.append('=>oid:{:.0f}, hids: {}'.format(oid, ';'.join(dist_format)))
             else:
                 oids_info.append('  oid:{:.0f}, hids: {}'.format(oid, ';'.join(dist_format)))
         additional_info.append(' | '.join(oids_info if len(oids_info) > 0 else ['NO MATCHING OID']))
-
         detailed_additional_info_dict[hid] = detailed_oids_info
-
         row_result = [str(hid)]
         for cell in id_distance_tuples:
             cell_oids = hid_oids_dict[cell[0]]
-            # print('oids', oids, cell_oids)
             if len(set(oids) & set(cell_oids)) > 0:
                 row_result.append('*{}:[{},{}]/{:.4f}'.format(cell[0], cell[2], cell[3], cell[1]))
             else:
                 row_result.append(' {}:[{},{}]/{:.4f}'.format(cell[0], cell[2], cell[3], cell[1]))
         format_results.append(row_result)
-        # print(oids_info)
-        # print(format_results)
-        # import sys
-        # sys.exit(0)
-        hid_result_tuples_dict[hid] = id_distance_tuples
-    return additional_info, format_results, hid_result_tuples_dict, feat_data, detailed_additional_info_dict
+    return additional_info, format_results, detailed_additional_info_dict
 
-    # print(first_fid_rows)
-    # print(last_fid_rows)
-
-def format_results_for_output(additional_info, format_results, hid_result_tuples_dict, nn):
-    format_output, format_out_dis = [], []
+def format_results_for_output(additional_info, format_results, nn):
+    format_output = []
     for info, row in zip(additional_info, format_results):
         # skip no matching ids
         if '=>' not in info:
@@ -225,6 +177,10 @@ def format_results_for_output(additional_info, format_results, hid_result_tuples
         format_output.append(''.join([
             '{:<20s}'.format(x) for x in row[:nn+1]
         ]))
+    return format_output
+
+def format_results_for_dis(hid_result_tuples_dict, nn):
+    format_out_dis = []
     format_out_dis.append('# HId1-HId2;min;max;avg;median;std;avg-std;avg+std')
     for hid, results in hid_result_tuples_dict.items():
         for _, (other_hid, _, _, _, _distances) in enumerate(results[:nn]):
@@ -235,13 +191,11 @@ def format_results_for_output(additional_info, format_results, hid_result_tuples
             _std = np.std(_distances)
             format_out_dis.append('%s-%s;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f' 
             % (hid, other_hid, _min, _max, _average, _median, _std, _average-_std, _average+_std))
-    return format_output, format_out_dis
+    return format_out_dis
 
-
-def produce_images_for_tracks(additional_info, format_results, hid_result_tuples_dict, \
-        nn, store_folder, feat_data, frame_path_template,\
-            detailed_additional_info_dict,
-            generate_raw_frames=True, generate_multi_match_only=False):
+def produce_images_for_tracks(hid_result_tuples_dict, nn, store_folder, feat_data, \
+        frame_path_template, detailed_additional_info_dict, generate_raw_frames=True, \
+        generate_multi_match_only=False, train_test='train'):
     if not os.path.isdir(store_folder):
         os.makedirs(store_folder)
     
@@ -296,35 +250,36 @@ def produce_images_for_tracks(additional_info, format_results, hid_result_tuples
         other_hid_set = set()
         hid_oids = defaultdict(list)
         pos = 0
-        for oid, hid_list in oids_info:
-            for other_hid, other_hid_dist, other_hid_type in hid_list:
-                # save.
-                if other_hid != hid and other_hid in other_hid_dist_dict:
-                    pos += 1
-                    if not os.path.isdir(hid_folder):
-                        os.makedirs(hid_folder)
-                    hid_oids[hid].append(oid)
-                    # generate 
-                    other_hid_frames_folder = hid_folder + '/matched_gt_frames/'
-                    if not os.path.isdir(other_hid_frames_folder):
-                        os.makedirs(other_hid_frames_folder)
+        if train_test != 'test':
+            for oid, hid_list in oids_info:
+                for other_hid, other_hid_dist, other_hid_type in hid_list:
+                    # save.
+                    if other_hid != hid and other_hid in other_hid_dist_dict:
+                        pos += 1
+                        if not os.path.isdir(hid_folder):
+                            os.makedirs(hid_folder)
+                        hid_oids[hid].append(oid)
+                        # generate 
+                        other_hid_frames_folder = hid_folder + '/matched_gt_frames/'
+                        if not os.path.isdir(other_hid_frames_folder):
+                            os.makedirs(other_hid_frames_folder)
 
-                    # save it.
-                    _dist, _hid_fid, _other_hid_fid, _distances = other_hid_dist_dict[other_hid]
-                    _hid_row = feat_data.loc[(feat_data['id'] == hid)\
-                        & (feat_data['fid'] == _hid_fid)].iloc[0]
-                    _other_hid_row = feat_data.loc[(feat_data['id'] == other_hid)\
-                        & (feat_data['fid'] == _other_hid_fid)].iloc[0]
-                    cv2.imwrite(image_template.format(
-                        folder=other_hid_frames_folder, pos=pos, hid=hid, 
-                        fid=_hid_row['fid'], dist=_dist
-                    ), __crop_image(_hid_row))
+                        # save it.
+                        _dist, _hid_fid, _other_hid_fid, _distances = other_hid_dist_dict[other_hid]
+                        _hid_row = feat_data.loc[(feat_data['id'] == hid)\
+                            & (feat_data['fid'] == _hid_fid)].iloc[0]
+                        _other_hid_row = feat_data.loc[(feat_data['id'] == other_hid)\
+                            & (feat_data['fid'] == _other_hid_fid)].iloc[0]
+                        cv2.imwrite(image_template.format(
+                            folder=other_hid_frames_folder, pos=pos, hid=hid, 
+                            fid=_hid_row['fid'], dist=_dist
+                        ), __crop_image(_hid_row))
 
-                    cv2.imwrite(image_template.format(
-                        folder=other_hid_frames_folder, pos=pos, hid=other_hid, 
-                        fid=_other_hid_row['fid'], dist=_dist
-                    ), __crop_image(_other_hid_row))
-                    other_hid_set.add(other_hid)
+                        cv2.imwrite(image_template.format(
+                            folder=other_hid_frames_folder, pos=pos, hid=other_hid, 
+                            fid=_other_hid_row['fid'], dist=_dist
+                        ), __crop_image(_other_hid_row))
+                        other_hid_set.add(other_hid)
         # skip if no other hid shares the same oid.
         if generate_multi_match_only and pos == 0:
             continue
@@ -383,70 +338,44 @@ def plot_distribution(distances, file_path=None, hid=-1, other_hid=-1):
         fig.savefig(file_path)
     plt.close(fig)
 
-def simple_test(dataset, method, reid_network, select_method, reid_model_pth_name='pretrained'):
-
-    # model_file_mapping = {
-    #     # default is
-    #     'pretrained': '',
-    #     'mot1': '../storage/models/reid/osnet_x1_0_mot17det_softmax_epoch2.pth',
-    #     'mot2': '../storage/models/reid/osnet_x1_0_mot17det_softmax_r2.pth',
-    #     'mot3': '../storage/models/reid/osnet_x1_0_mot17det_softmax_r3.pth',
-    # }
-    # reid_model_pth = model_file_mapping[reid_model_pth_name]
-
+def simple_test(dataset, method, reid_network, select_method, reid_model_pth_name='pretrained', train_test='train'):
     gt_template = '../storage/dataset/MOT17/train/{}/gt/gt.txt'
-    method_result_template = '../storage/results/mot17/{}/faster_rcnn-{}-person.txt'
-    feat_template = '../storage/results/mot17/{}/feats-raw/faster_rcnn-{}-person-feat-{}-{}.pkl'
-    # feat_template = '../storage/results/mot17/{}/faster_rcnn-{}-person-feat.pkl'
-    result_path = '../storage/results/mot17/{}/reid-feat-person/{}-{}-pairwise-{}-{}.txt'
+    # frame_path_template = '../storage/dataset/MOT17BGS/train/'+dataset[:-6]+'/img1/{:06d}.jpg'
+    frame_path_template = '../storage/dataset/MOT17/{train_test}/'.format(train_test=train_test)+dataset+'/img1/{:06d}.jpg'
+    method_result_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
+    feat_template = '../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}-{}.pkl'
+    result_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-pairwise-{}-{}.txt'
+    image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-pairwise-{}-{}/'
+    dis_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-dis-{}.txt'
 
-    frame_path_template = '../storage/dataset/MOT17BGS/train/'+dataset[:-6]+'/img1/{:06d}.jpg'
-    # frame_path_template = '../storage/dataset/MOT17/train/'+dataset+'/img1/{:06d}.jpg'
-    image_result_path = '../storage/results/mot17/{}/reid-feat-person-images/{}-{}-pairwise-{}-{}/'
-
-    filtered_method_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
-    filtered_result_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-pairwise-{}-{}.txt'
-    filtered_image_result_path = '../storage/results/mot17/{}/reid-feat-person-images-filtered/{}-{}-pairwise-{}-{}/'
-    filtered_feat_template ='../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}-{}.pkl'
-    filtered_dis_path = '../storage/results/mot17/{}/reid-feat-person-filtered/{}-{}-dis-{}.txt'
- 
-    result_path = filtered_result_path
-    dis_path = filtered_dis_path
-    method_result_template = filtered_method_template
-    image_result_path = filtered_image_result_path
-    feat_template = filtered_feat_template
-
-    print("processing method [{}] with reid model {}".format(method, reid_network))
-
-    import time
-    start = time.process_time()
-
-    a, b, c, d, e = produce_track_distance(
-                feat_template.format(dataset, method , reid_network, reid_model_pth_name), 
-                gt_template.format(dataset),
-                method_result_template.format(dataset, method, reid_network, select_method, reid_model_pth_name), 
-                select_method
-                )
-    end = time.process_time()
-    print('time used', end - start)
-
-    outputs, out_dis = format_results_for_output(a, b, c, 10)
-
-    # output.
-    output_path = result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name)
-    parent_dir = os.path.dirname(output_path)
-    if not os.path.isdir(parent_dir):
-        os.makedirs(parent_dir)
-    with open(output_path, 'w') as f:
-        f.write('\n'.join(outputs))
+    print("dataset: {}".format(dataset))
+    print("\tprocessing method [{}] with reid model {}".format(method, reid_network))
+    hid_result_tuples_dict, all_track_pair_distance_dict, feat_data = get_hid_result(
+        feat_template.format(dataset, method , reid_network, reid_model_pth_name), select_method)
+    if train_test != 'test':
+        additional_info, format_results, detailed_additional_info_dict = produce_track_distance(
+            gt_template.format(dataset),
+            method_result_template.format(dataset, method, reid_network, select_method, reid_model_pth_name), 
+            hid_result_tuples_dict, all_track_pair_distance_dict)
+        outputs = format_results_for_output(additional_info, format_results, 10)
+        # output
+        output_path = result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name)
+        parent_dir = os.path.dirname(output_path)
+        if not os.path.isdir(parent_dir):
+            os.makedirs(parent_dir)
+        with open(output_path, 'w') as f:
+            f.write('\n'.join(outputs))
     # distance file
+    out_dis = format_results_for_dis(hid_result_tuples_dict, 10)
     output_dis_path = dis_path.format(dataset, method, reid_network, reid_model_pth_name)
     with open(output_dis_path, 'w') as f:
         f.write('\n'.join(out_dis))
-    
-    produce_images_for_tracks(a, b, c, 10, \
+    # producing images
+    print("\tproducing images")
+    produce_images_for_tracks(hid_result_tuples_dict, 10, \
         image_result_path.format(dataset, method, reid_network, select_method, reid_model_pth_name), \
-            d, frame_path_template, e, generate_raw_frames=True)
+        feat_data, frame_path_template, detailed_additional_info_dict, 
+        generate_raw_frames=True, train_test=train_test)
 
 def test_dataset(dataset):
     print('processing dataset', dataset)
@@ -460,6 +389,9 @@ def test_dataset(dataset):
 if __name__ == '__main__':
     # test_dataset('MOT17-09-DPM')
     
-    for did in ['04', '09', '11']:  # '04', '09', '10', '11'
-        simple_test('MOT17-%s-FRCNN' % did, 'tracktor', 'osnet_x1_0', 'median', 'mot3')
-        simple_test('MOT17-%s-FRCNN' % did, 'tracktor', 'osnet_x1_0', 'avg', 'mot3')
+    # # for did in ['04', '09', '11']:  # '04', '09', '10', '11'
+    # for did in ['01']:
+    #     for method_sel in ['median', 'avg']:
+    #         simple_test('MOT17-%s-FRCNN' % did, 'tracktor', 'osnet_x1_0', method_sel, 'mot3', train_test='test')
+    
+    simple_test('MOT17-04-FRCNN', 'tracktor', 'osnet_x1_0', 'avg', 'mot3', train_test='train')
