@@ -51,15 +51,17 @@ class VideoSource(Source):
         self.__video.release()
     
 class ImageSource(Source):
-    def __init__(self, folder):
+    def __init__(self, folder, image_prefix=''):
         self.folder = folder
+        self.image_prefix = image_prefix
         super(ImageSource, self).__init__()
 
     def read_image_folder(self, folder):
         images = []
         for root, _, files in os.walk(folder):
             for file in files:
-                images.append((os.path.join(root, file), int(file[:file.index('.')])))
+                image_seq_str = file[len(self.image_prefix): file.index('.')]
+                images.append((os.path.join(root, file), int(image_seq_str)))
         # sort images.
         images.sort(key=cmp_to_key(lambda x1, x2: x1[1] - x2[1]))
         return images
