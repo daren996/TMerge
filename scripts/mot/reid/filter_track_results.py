@@ -35,12 +35,14 @@ def preprocess(dataset, method, train_test='train', obj_frame_threshold=100):
         ]
         return dt_result
 
+    print(dataset, 'origin feats:', len(dt_result), end=', new feats: ')
     # 1. filter out short objs.
     dt_result = _filter_short_objs(dt_result)
     # print(dt_result)
     # 2. filter out detections on the screen edges
     dt_result = _filter_bboxes_on_borders(dt_result)
-    print(dt_result)
+    print(len(dt_result))
+    # print(dt_result)
 
     save_tracked_txt(output_template.format(dataset, method), dt_result)
 
@@ -58,19 +60,20 @@ def save_tracked_txt(path, pf):
     
 
 if __name__ == '__main__':
+    tracking_model = 'uma'  # or sort, deepsort, tracktor, uma, center_track
     # # training set
-    # preprocess('MOT17-02-FRCNN', 'tracktor')  # or deepsort
-    # preprocess('MOT17-04-FRCNN', 'tracktor')
-    # preprocess('MOT17-05-FRCNN', 'tracktor')
-    # preprocess('MOT17-09-FRCNN', 'tracktor')
-    # preprocess('MOT17-10-FRCNN', 'tracktor')
-    # preprocess('MOT17-11-FRCNN', 'tracktor')
-    # preprocess('MOT17-13-FRCNN', 'tracktor')
+    # preprocess('MOT17-02-FRCNN', tracking_model)
+    preprocess('MOT17-04-FRCNN', tracking_model)
+    # preprocess('MOT17-05-FRCNN', tracking_model)
+    preprocess('MOT17-09-FRCNN', tracking_model)
+    # preprocess('MOT17-10-FRCNN', tracking_model)
+    preprocess('MOT17-11-FRCNN', tracking_model)
+    # preprocess('MOT17-13-FRCNN', tracking_model)
     # # test set
-    preprocess('MOT17-01-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-03-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-06-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-07-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-08-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-12-FRCNN', 'tracktor', train_test='test')
-    preprocess('MOT17-14-FRCNN', 'tracktor', train_test='test')
+    preprocess('MOT17-01-FRCNN', tracking_model, train_test='test')
+    # preprocess('MOT17-03-FRCNN', tracking_model, train_test='test')
+    preprocess('MOT17-06-FRCNN', tracking_model, train_test='test')
+    preprocess('MOT17-07-FRCNN', tracking_model, train_test='test')
+    preprocess('MOT17-08-FRCNN', tracking_model, train_test='test')
+    preprocess('MOT17-12-FRCNN', tracking_model, train_test='test')
+    preprocess('MOT17-14-FRCNN', tracking_model, train_test='test')

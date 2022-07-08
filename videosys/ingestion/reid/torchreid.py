@@ -58,4 +58,3 @@ class TorchReIdFeatureExtracor(Operator):
             result.append(TrackFeature(t.uid, t.bbox, feat.cpu()))
         tables[fields.DATA_TRACK_FEAT] = result
         self.collector.emit(tables)
-        

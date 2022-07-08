@@ -42,7 +42,14 @@ Configuration is set in file `mot_osnet_x1_0_softmax_256x128_amsgrad.yaml`.
 
 Newly trained reid model is located in `log/osnet_x1_0_mot17det_softmax_rx/model`
 
-### Example: test new reid model
+
+### w/ Triplet Loss
+
+```
+python ./videosys/train/reid/train_reid.py --config-file config/train/reid/mot_osnet_x1_0_triplet_256x128_amsgrad.yaml
+```
+
+## Example: test new reid model
 
 first, run all (or some of) the mot methods
 ```
@@ -62,5 +69,5 @@ python ./scripts/mot/reid/extract_reid_features_w_torch_reid.py
 test mot features pairwise
 ```
 python ./scripts/mot/reid/test_mot_person_reid_features_pairwise_average.py
-python ./scripts/mot/reid/plot_rank_and_sampling.py  # plot rank
+python ./scripts/mot/reid/plot_rank_and_sampling.py
 ```

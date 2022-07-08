@@ -48,4 +48,5 @@ class ProgressReporter(Operator):
         print(msg)
 
     def cleanup(self):
-        self.report('done. time elapsed: {:.2f}s'.format(time.time() - self.start))
+        time_used = time.time() - self.start
+        self.report('done. time elapsed: {:.2f}s. fps: {:.2f}'.format(time_used, self.total_frames/time_used))

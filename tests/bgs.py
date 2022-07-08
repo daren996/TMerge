@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--dataset', type=str, help='MOT dataset id.')
 parser.add_argument('--algo', type=str, 
     help='Background subtraction method (KNN, MOG2).', default='MOG2')
+parser.add_argument('--train_test', type=str, help='Train Set or Test Set.', default='train')
 parser.add_argument('--show', type=int, help='Show results.', default=0)
 args = parser.parse_args()
 
@@ -29,6 +30,7 @@ else:
 print(args.dataset)
 print(datasets)
 
+train_test = args.train_test
 for dataset in datasets:
     print("Processing MOT17-{}".format(dataset))
     if args.algo == 'MOG2':
@@ -37,7 +39,7 @@ for dataset in datasets:
         backSub = cv2.createBackgroundSubtractorKNN()
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
 
-    source_path = '../storage/dataset/MOT17Det/train/MOT17-{}/img1'.format(dataset)
+    source_path = '../storage/dataset/MOT17Det/{}/MOT17-{}/img1'.format(train_test, dataset)
     images = []
     for root, _, files in os.walk(source_path):
         for file in files:
@@ -45,10 +47,10 @@ for dataset in datasets:
     images = [file[0] for file in sorted(images, key=lambda x:x[1])]
     images = [images[0]] + images
 
-    if not os.path.exists('../storage/dataset/MOT17BGS/train/MOT17-{}'.format(dataset)):
-        shutil.copytree('../storage/dataset/MOT17Det/train/MOT17-{}'.format(dataset), 
-                        '../storage/dataset/MOT17BGS/train/MOT17-{}'.format(dataset))
-    output_path = '../storage/dataset/MOT17BGS/train/MOT17-{}/img1'.format(dataset)
+    if not os.path.exists('../storage/dataset/MOT17BGS/{}/MOT17-{}'.format(train_test, dataset)):
+        shutil.copytree('../storage/dataset/MOT17Det/{}/MOT17-{}'.format(train_test, dataset), 
+                        '../storage/dataset/MOT17BGS/{}/MOT17-{}'.format(train_test, dataset))
+    output_path = '../storage/dataset/MOT17BGS/{}/MOT17-{}/img1'.format(train_test, dataset)
 
     for idx, file in enumerate(images):
         if idx > 99 and idx % 100 == 0:

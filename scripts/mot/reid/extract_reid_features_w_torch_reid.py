@@ -2,14 +2,22 @@
 # extract reid features.
 import os
 
-
-def extract_features_for_dataset(dataset, noexc=False, train_test='train'):
+def extract_features_for_dataset(dataset, noexc=True, train_test='train', loss_name='softmax'):
+    mrg, wt, wx = '005', '10', '05'
+    if loss_name == 'triplet':
+        loss_str = 'triplet_mrg{}_wt{}_wx{}'.format(mrg, wt, wx)
+    else:
+        loss_str = 'softmax_rx_noexc'
     data_path_template = '../storage/dataset/MOT17/{}/{}/img1'
     result_template = '../storage/results/mot17/{}/filtered-tracked/faster_rcnn-{}-person.txt'
-    feature_save_template = '../storage/results/mot17/{}/feats-raw-filtered/faster_rcnn-{}-person-feat-{}-{}.pkl'
+    feature_save_template = '../storage/results/mot17/{}/feats-raw-filtered_%s' + \
+        '/faster_rcnn-{}-person-feat-{}-{}.pkl'
+    feature_save_template = feature_save_template % loss_str
     methods = [
-        # 'sort', 'deepsort', 
-        'tracktor'
+        # 'sort', 
+        # 'deepsort', 
+        'tracktor',
+        # 'uma',
     ]
     reid_models = [
         'osnet_x1_0',
@@ -26,8 +34,7 @@ def extract_features_for_dataset(dataset, noexc=False, train_test='train'):
         'MOT17-04-FRCNN': '../storage/models/reid/osnet_x1_0_mot17det_softmax_rx_04.pth',
         'MOT17-09-FRCNN': '../storage/models/reid/osnet_x1_0_mot17det_softmax_rx_09.pth',
         'MOT17-11-FRCNN': '../storage/models/reid/osnet_x1_0_mot17det_softmax_rx_11.pth',
-        # 'noexc': '../storage/models/reid/osnet_x1_0_mot17det_softmax_rx_noexc.pth',
-        'noexc': '../storage/models/reid/osnet_x1_0_mot17det_softmax_rx_noexc.pth',
+        'noexc': '../storage/models/reid/osnet_x1_0_mot17det_{}.pth'.format(loss_str),
     }
     model_path_name = 'mot3'
     # gen 
@@ -50,18 +57,18 @@ def extract_features_for_dataset(dataset, noexc=False, train_test='train'):
 if __name__ == '__main__':
     no_exclusion = True
     # # training set
-    # extract_features_for_dataset('MOT17-02-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-05-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-10-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-13-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-04-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-09-FRCNN', noexc=no_exclusion)
-    # extract_features_for_dataset('MOT17-11-FRCNN', noexc=no_exclusion)
+    # # extract_features_for_dataset('MOT17-02-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    # # extract_features_for_dataset('MOT17-05-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    # # extract_features_for_dataset('MOT17-10-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    # # extract_features_for_dataset('MOT17-13-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    extract_features_for_dataset('MOT17-04-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    extract_features_for_dataset('MOT17-09-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
+    extract_features_for_dataset('MOT17-11-FRCNN', noexc=no_exclusion, train_test='train', loss_name='triplet')
     # # test set
-    extract_features_for_dataset('MOT17-01-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-03-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-06-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-07-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-08-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-12-FRCNN', noexc=no_exclusion, train_test='test')
-    extract_features_for_dataset('MOT17-14-FRCNN', noexc=no_exclusion, train_test='test')
+    # # extract_features_for_dataset('MOT17-03-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-01-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-06-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-07-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-08-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-12-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')
+    extract_features_for_dataset('MOT17-14-FRCNN', noexc=no_exclusion, train_test='test', loss_name='triplet')

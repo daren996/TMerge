@@ -41,6 +41,9 @@ def get_default_config():
     cfg.mot.vis_threshold=0.3
     cfg.mot.exclude_sequences=[]
 
+    cfg.kitti = CN()
+    cfg.kitti.exclude_sequences=[]
+
     # sampler
     cfg.sampler = CN()
     cfg.sampler.train_sampler = 'RandomSampler' # sampler for source train loader
@@ -143,6 +146,8 @@ def imagedata_kwargs(cfg):
         # mot dataset
         'mot_vis_threshold': cfg.mot.vis_threshold,
         'mot_exclude_sequences': cfg.mot.exclude_sequences,
+        # kitti dataset
+        'kitti_exclude_sequences': cfg.kitti.exclude_sequences,
     }
 
 

@@ -19,17 +19,17 @@ from videosys.train.reid.default_config import (
     get_default_config, lr_scheduler_kwargs
 )
 
-from videosys.train.reid.dataset import MOTDataset
+from videosys.train.reid.dataset import MOTDataset, KITTIDataset
 from videosys.train.reid.datamanager import ImageDataManager
 from videosys.train.reid.engine import RefinedImageSoftmaxEngine, RefinedImageTripletEngine
 
 def build_datamanager(cfg):
     register_image_dataset('mot17det', MOTDataset)
+    register_image_dataset('kitti', KITTIDataset)
     if cfg.data.type == 'image':
         return ImageDataManager(**imagedata_kwargs(cfg))
     else:
         return VideoDataManager(**videodata_kwargs(cfg))
-
 
 def build_engine(cfg, datamanager, model, optimizer, scheduler):
     if cfg.data.type == 'image':
@@ -42,7 +42,6 @@ def build_engine(cfg, datamanager, model, optimizer, scheduler):
                 use_gpu=cfg.use_gpu,
                 label_smooth=cfg.loss.softmax.label_smooth
             )
-
         else:
             engine = RefinedImageTripletEngine(
                 datamanager,
@@ -55,7 +54,6 @@ def build_engine(cfg, datamanager, model, optimizer, scheduler):
                 use_gpu=cfg.use_gpu,
                 label_smooth=cfg.loss.softmax.label_smooth
             )
-
     else:
         print('NOT IMPLEMENTED!')
         # if cfg.loss.name == 'softmax':
@@ -68,7 +66,6 @@ def build_engine(cfg, datamanager, model, optimizer, scheduler):
         #         label_smooth=cfg.loss.softmax.label_smooth,
         #         pooling_method=cfg.video.pooling_method
         #     )
-
         # else:
         #     engine = torchreid.engine.VideoTripletEngine(
         #         datamanager,
@@ -81,9 +78,7 @@ def build_engine(cfg, datamanager, model, optimizer, scheduler):
         #         use_gpu=cfg.use_gpu,
         #         label_smooth=cfg.loss.softmax.label_smooth
         #     )
-
     return engine
-
 
 def reset_config(cfg, args):
     if args.root:
@@ -95,12 +90,10 @@ def reset_config(cfg, args):
     if args.transforms:
         cfg.data.transforms = args.transforms
 
-
 def check_cfg(cfg):
     if cfg.loss.name == 'triplet' and cfg.loss.triplet.weight_x == 0:
         assert cfg.train.fixbase_epoch == 0, \
             'The output of classifier is not included in the computational graph'
-
 
 def main():
     parser = argparse.ArgumentParser(
@@ -193,7 +186,6 @@ def main():
     )
     engine = build_engine(cfg, datamanager, model, optimizer, scheduler)
     engine.run(**engine_run_kwargs(cfg))
-
 
 if __name__ == '__main__':
     main()
