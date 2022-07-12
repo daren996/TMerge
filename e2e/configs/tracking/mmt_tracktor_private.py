@@ -20,14 +20,13 @@ default_args = dict(
     match_score_threshold='2.0',
     save_type=False,
     detect_classes='',
-    image_prefix = '',
 )
 
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
 def operators(args):
     ops = [
-        create_source_for_path(args.path, args.image_prefix),
+        create_source_for_path(args.path),
         MMLibCompatable(),
         MMMultiScaleFlipAug([
             dict(type='Resize', keep_ratio=True),

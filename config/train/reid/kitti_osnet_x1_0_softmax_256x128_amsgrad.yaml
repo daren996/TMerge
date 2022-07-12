@@ -12,20 +12,16 @@ data:
   width: 128
   combineall: False
   transforms: ['random_flip']
-  save_dir: 'log/osnet_x1_0_kitti_triplet_mrg005_wt10_wx05'
+  save_dir: 'log/osnet_x1_0_kitti_softmax_rx_noexc'
 
 mot:
   vis_threshold: 0.3
   exclude_sequences: []
 
 loss:
-  name: 'triplet'
+  name: 'softmax'
   softmax:
     label_smooth: True
-  triplet:
-    margin: 0.05
-    weight_t: 1.0
-    weight_x: 0.5
 
 train:
   optim: 'amsgrad'

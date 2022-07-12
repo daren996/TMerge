@@ -7,8 +7,7 @@ from videosys.utils.visualize_utils import draw_bbox_and_labels
 
 class ObjectTrackingVisualizer(Operator):
     def __init__(self, window_name='track_vis', visualize_track=True, 
-            visualize_track_gt=False, display=True, thickness = 1, \
-                font_scale=.5, wait_ms=100):
+            visualize_track_gt=False, display=True, thickness = 1, font_scale=.5):
         super().__init__()
         self.window_name = window_name
         self.__visualize_track = visualize_track
@@ -16,7 +15,6 @@ class ObjectTrackingVisualizer(Operator):
         self.display = display
         self.thickness = thickness
         self.font_scale = font_scale
-        self.wait_ms = wait_ms
 
     def prepare(self):
         if self.context.has(fields.META_OBJECT_DETECTION_CLASSES):
@@ -61,6 +59,6 @@ class ObjectTrackingVisualizer(Operator):
                 font_scale= self.font_scale)
         if self.display:
             cv2.imshow(self.window_name, image)
-            cv2.waitKey(self.wait_ms)
+            cv2.waitKey(100)
         tables[fields.DATA_FRAME_TRACK] = image
         self.collector.emit(tables)
