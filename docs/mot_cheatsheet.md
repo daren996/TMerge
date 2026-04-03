@@ -69,5 +69,4 @@ python ./scripts/mot/reid/extract_reid_features_w_torch_reid.py
 test mot features pairwise
 ```
 python ./scripts/mot/reid/test_mot_person_reid_features_pairwise_average.py
-python ./scripts/mot/reid/plot_rank_and_sampling.py
 ```

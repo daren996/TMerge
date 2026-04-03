@@ -9,6 +9,4 @@ python ./scripts/kitti/run_mot_methods.py
 python ./scripts/kitti/filter_track_results.py
 python ./scripts/kitti/extract_reid_features_w_torch_reid.py
 python ./scripts/kitti/test_mot_person_reid_features_pairwise_average.py
-python ./scripts/kitti/plot_rank_and_sampling.py
 ```
-

@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: TMerge
+message: If you use this repository, please cite the associated ICDE 2023 paper.
+type: software
+authors:
+  - family-names: Chao
+    given-names: Daren
+  - family-names: Chen
+    given-names: Yueting
+  - family-names: Koudas
+    given-names: Nick
+  - family-names: Yu
+    given-names: Xiaohui
+preferred-citation:
+  type: paper-conference
+  authors:
+    - family-names: Chao
+      given-names: Daren
+    - family-names: Chen
+      given-names: Yueting
+    - family-names: Koudas
+      given-names: Nick
+    - family-names: Yu
+      given-names: Xiaohui
+  title: Track Merging for Effective Video Query Processing
+  year: 2023
+  conference-title: 2023 IEEE 39th International Conference on Data Engineering (ICDE)
+  start: 164
+  end: 176
+  doi: 10.1109/ICDE55515.2023.00020

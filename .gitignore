@@ -8,3 +8,6 @@ models/
 **/output/
 log/
 reid-data/
+.env
+.env.*
+command_history.txt

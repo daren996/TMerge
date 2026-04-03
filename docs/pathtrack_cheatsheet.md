@@ -9,6 +9,4 @@ python ./scripts/pathtrack/run_mot_methods.py
 python ./scripts/pathtrack/filter_track_results.py
 python ./scripts/pathtrack/extract_reid_features_w_torch_reid.py
 python ./scripts/pathtrack/test_mot_person_reid_features_pairwise_average.py
-python ./scripts/pathtrack/plot_rank_and_sampling.py
 ```
-
