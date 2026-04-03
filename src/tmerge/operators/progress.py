@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import time
 
 from tmerge.core.runtime import Operator, RuntimeContext
@@ -13,6 +13,7 @@ from tmerge.models.types import FramePacket
 class ProgressReporter(Operator):
     report_interval: int = 100
     log_prefix: str = "pipeline"
+    _started_at: float = field(init=False, default=0.0)
 
     @classmethod
     def from_config(cls, config: dict[str, object]) -> "ProgressReporter":

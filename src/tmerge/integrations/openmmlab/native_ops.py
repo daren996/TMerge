@@ -95,6 +95,10 @@ class MMDetDetector(Operator):
     with_features: bool = False
     img_scale: tuple[int, int] = (1088, 1088)
     transforms: list[dict[str, Any]] = field(default_factory=list)
+    _bbox2result: Any = field(init=False, default=None)
+    _torch: Any = field(init=False, default=None)
+    _model: Any = field(init=False, default=None)
+    _detect_class_ids: list[int] | None = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> "MMDetDetector":
@@ -166,6 +170,9 @@ class MMDetDetector(Operator):
 class MMTrackingMOTOperator(Operator):
     config_file: str
     device: str = "cuda:0"
+    _restore_result: Any = field(init=False, default=None)
+    _inference_mot: Any = field(init=False, default=None)
+    _model: Any = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> "MMTrackingMOTOperator":
@@ -192,6 +199,11 @@ class MMTrackingSortOperator(Operator):
     reid: dict[str, Any] | None = None
     tracker_kind: str = "sort"
     device: str = "cuda:0"
+    _torch: Any = field(init=False, default=None)
+    _track2result: Any = field(init=False, default=None)
+    _restore_result: Any = field(init=False, default=None)
+    _model: Any = field(init=False, default=None)
+    _tracker: Any = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> "MMTrackingSortOperator":
@@ -300,6 +312,9 @@ class TorchReIdExtractor(Operator):
     model_name: str
     model_path: str
     device: str = "cuda"
+    _torch: Any = field(init=False, default=None)
+    _cv2: Any = field(init=False, default=None)
+    _extractor: Any = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, Any]) -> "TorchReIdExtractor":

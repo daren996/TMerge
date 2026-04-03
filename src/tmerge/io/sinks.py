@@ -39,6 +39,7 @@ class ImageFolderSink(Operator):
 class VideoSink(Operator):
     path: Path
     fps: float | None = None
+    _writer: object = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, object]) -> "VideoSink":
@@ -49,7 +50,6 @@ class VideoSink(Operator):
 
     def prepare(self, context: RuntimeContext) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._writer = None
 
     def process(self, packet: FramePacket, context: RuntimeContext) -> FramePacket:
         if self._writer is None:
