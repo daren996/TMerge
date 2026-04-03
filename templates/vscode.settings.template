@@ -3,7 +3,7 @@
     "editor.tabSize": 4,
     "python.pythonPath": ${condaPythonPath},
     "terminal.integrated.env.windows": {
-        "PYTHONPATH": "${workspaceFolder}/videosys;${workspaceFolder}/tests",
+        "PYTHONPATH": "${workspaceFolder}/src;${workspaceFolder}/tests",
     },
     "python.linting.pylintArgs": [
         "--init-hook",

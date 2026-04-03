@@ -9,15 +9,11 @@ import numpy as np
 
 from tmerge.core.runtime import Operator, RuntimeContext
 from tmerge.models.types import DetectionResult, FramePacket, TrackFeature, TrackingResult
+from tmerge.utils.common import require_optional
 
 
-def _require_module(module_name: str, install_hint: str) -> Any:
-    try:
-        return __import__(module_name, fromlist=["_sentinel"])
-    except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            f"Optional dependency '{module_name}' is required. Install with: {install_hint}"
-        ) from exc
+def _require_module(module_name: str, install_hint: str = "") -> Any:
+    return require_optional(module_name, pip_extra="openmmlab")
 
 
 def _build_mmlib_sample(frame: np.ndarray, transforms: list[dict[str, Any]], img_scale: tuple[int, int], device: str) -> dict[str, Any]:

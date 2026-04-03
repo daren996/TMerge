@@ -9,6 +9,7 @@ import numpy as np
 
 from tmerge.io.mot import load_mot_tracks
 from tmerge.models.types import TrackingResult
+from tmerge.utils.common import natural_frame_key as _natural_frame_key
 
 
 def render_track_frame(
@@ -157,7 +158,4 @@ def _draw_multiline_label(
         )
 
 
-def _natural_frame_key(path: Path) -> tuple[int, str]:
-    stem = path.stem
-    return (int(stem), path.name) if stem.isdigit() else (10**12, path.name)
 

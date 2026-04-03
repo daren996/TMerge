@@ -10,6 +10,7 @@ import cv2
 
 from tmerge.core.runtime import RuntimeContext, Source
 from tmerge.models.types import FramePacket, ImageFolderMeta, VideoMeta
+from tmerge.utils.common import natural_frame_key as _natural_frame_key
 
 
 @dataclass(slots=True)
@@ -85,7 +86,4 @@ class VideoSource(Source):
             capture.release()
 
 
-def _natural_frame_key(path: Path) -> tuple[int, str]:
-    stem = path.stem
-    return (int(stem), path.name) if stem.isdigit() else (10**12, path.name)
 

@@ -6,9 +6,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import numpy as np
-
 from tmerge.core.runtime import Operator, RuntimeContext
+from tmerge.io.mot import load_mot_rows
 from tmerge.models.types import DetectionResult, FramePacket, TrackingResult
 
 
@@ -29,30 +28,22 @@ class MotResultLoader(Operator):
         )
 
     def prepare(self, context: RuntimeContext) -> None:
-        if not self.path.exists():
-            raise FileNotFoundError(f"MOT result file not found: {self.path}")
+        rows = load_mot_rows(self.path)
         frame_map: defaultdict[int, list[TrackingResult | DetectionResult]] = defaultdict(list)
-        with self.path.open("r", encoding="utf-8") as handle:
-            for line in handle:
-                if not line.strip():
-                    continue
-                parts = line.split(",")
-                frame_id = int(parts[0])
-                track_id = int(parts[1])
-                left, top, width, height = map(float, parts[2:6])
-                score = float(parts[6])
-                bbox = np.array([left, top, left + width, top + height], dtype=float)
-                if self.emit_detections:
-                    frame_map[frame_id].append(DetectionResult(bbox=bbox, label=-1, confidence=score))
-                else:
-                    frame_map[frame_id].append(
-                        TrackingResult(
-                            uid=track_id,
-                            label=-1,
-                            bbox=bbox,
-                            confidence=score,
-                        )
+        for row in rows:
+            if self.emit_detections:
+                frame_map[row.frame_id].append(
+                    DetectionResult(bbox=row.bbox, label=-1, confidence=row.confidence)
+                )
+            else:
+                frame_map[row.frame_id].append(
+                    TrackingResult(
+                        uid=row.track_id,
+                        label=row.class_id,
+                        bbox=row.bbox,
+                        confidence=row.confidence,
                     )
+                )
         self._frame_map = dict(frame_map)
 
     def process(self, packet: FramePacket, context: RuntimeContext) -> FramePacket:
