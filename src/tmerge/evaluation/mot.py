@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 
 from tmerge.io.mot import load_mot_tracks
+from tmerge.utils.common import require_optional
 
 
 def evaluate_mot_results(
@@ -61,12 +62,5 @@ def evaluate_mot_results(
 
 
 def _require_motmetrics() -> Any:
-    try:
-        import motmetrics
-    except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "MOT evaluation requires optional dependency 'motmetrics'. "
-            'Install with: python -m pip install motmetrics'
-        ) from exc
-    return motmetrics
+    return require_optional("motmetrics", purpose="MOT evaluation")
 

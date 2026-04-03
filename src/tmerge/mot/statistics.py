@@ -42,21 +42,26 @@ def save_mot_track_statistics(
     output_plot: str | Path | None = None,
     label: str | None = None,
 ) -> dict[str, Any]:
-    rows = load_mot_rows(result_path)
-    durations = Counter(row.track_id for row in rows)
-    data = pd.DataFrame(
-        {
-            "track_id": list(durations.keys()),
-            "duration": list(durations.values()),
-        }
-    )
-    if output_csv is not None:
-        output_csv_path = Path(output_csv).expanduser()
-        output_csv_path.parent.mkdir(parents=True, exist_ok=True)
-        data.sort_values("duration", ascending=False).to_csv(output_csv_path, index=False)
-    if output_plot is not None:
-        _save_duration_plot(data, output_plot, title=label or Path(result_path).stem)
-    return mot_track_statistics(result_path)
+    stats = mot_track_statistics(result_path)
+
+    if output_csv is not None or output_plot is not None:
+        # Build per-track duration table only when an export is requested.
+        rows = load_mot_rows(result_path)
+        durations = Counter(row.track_id for row in rows)
+        data = pd.DataFrame(
+            {
+                "track_id": list(durations.keys()),
+                "duration": list(durations.values()),
+            }
+        )
+        if output_csv is not None:
+            output_csv_path = Path(output_csv).expanduser()
+            output_csv_path.parent.mkdir(parents=True, exist_ok=True)
+            data.sort_values("duration", ascending=False).to_csv(output_csv_path, index=False)
+        if output_plot is not None:
+            _save_duration_plot(data, output_plot, title=label or Path(result_path).stem)
+
+    return stats
 
 
 def _save_duration_plot(data: pd.DataFrame, output_plot: str | Path, *, title: str) -> None:

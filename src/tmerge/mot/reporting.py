@@ -7,6 +7,8 @@ from typing import Any
 
 import pandas as pd
 
+from tmerge.utils.common import require_optional
+
 
 def evaluate_mot_batch(
     ground_truth_path: str | Path,
@@ -58,12 +60,5 @@ def save_mot_batch_report(
 
 
 def _require_motmetrics() -> Any:
-    try:
-        import motmetrics
-    except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "Batch MOT reporting requires optional dependency 'motmetrics'. "
-            'Install with: python -m pip install motmetrics'
-        ) from exc
-    return motmetrics
+    return require_optional("motmetrics", purpose="Batch MOT reporting")
 

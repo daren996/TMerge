@@ -82,6 +82,26 @@ class RedefinedDataset(Dataset):
             dsets.add(dsetid)
         return len(dsets)
 
+    def _crop_and_transform(self, index):
+        """Shared item loading logic for bbox-based ReID datasets."""
+        img_path, pid, camid, bbox, vis, dsetid = self.data[index]
+        img = read_image(img_path)
+
+        width, height = img.size
+        w = bbox[2] - bbox[0]
+        h = bbox[3] - bbox[1]
+        context = 0
+        bbox[0] = np.clip(bbox[0] - context * w, 0, width - 1)
+        bbox[1] = np.clip(bbox[1] - context * h, 0, height - 1)
+        bbox[2] = np.clip(bbox[2] + context * w, 0, width - 1)
+        bbox[3] = np.clip(bbox[3] + context * h, 0, height - 1)
+
+        img = img.crop(bbox)
+
+        if self.transform is not None:
+            img = self._transform_image(self.transform, self.k_tfm, img)
+        return {"img": img, "pid": pid, "camid": camid, "impath": img_path, "dsetid": dsetid}
+
 
 class MOTDataset(RedefinedDataset):
     train_sequences = [
@@ -157,23 +177,7 @@ class MOTDataset(RedefinedDataset):
         return total
 
     def __getitem__(self, index):
-        img_path, pid, camid, bbox, vis, dsetid = self.data[index]
-        img = read_image(img_path)
-
-        width, height = img.size
-        w = bbox[2] - bbox[0]
-        h = bbox[3] - bbox[1]
-        context = 0
-        bbox[0] = np.clip(bbox[0] - context * w, 0, width - 1)
-        bbox[1] = np.clip(bbox[1] - context * h, 0, height - 1)
-        bbox[2] = np.clip(bbox[2] + context * w, 0, width - 1)
-        bbox[3] = np.clip(bbox[3] + context * h, 0, height - 1)
-
-        img = img.crop(bbox)
-
-        if self.transform is not None:
-            img = self._transform_image(self.transform, self.k_tfm, img)
-        return {"img": img, "pid": pid, "camid": camid, "impath": img_path, "dsetid": dsetid}
+        return self._crop_and_transform(index)
 
 
 class KITTIDataset(RedefinedDataset):
@@ -231,21 +235,5 @@ class KITTIDataset(RedefinedDataset):
         return total
 
     def __getitem__(self, index):
-        img_path, pid, camid, bbox, vis, dsetid = self.data[index]
-        img = read_image(img_path)
-
-        width, height = img.size
-        w = bbox[2] - bbox[0]
-        h = bbox[3] - bbox[1]
-        context = 0
-        bbox[0] = np.clip(bbox[0] - context * w, 0, width - 1)
-        bbox[1] = np.clip(bbox[1] - context * h, 0, height - 1)
-        bbox[2] = np.clip(bbox[2] + context * w, 0, width - 1)
-        bbox[3] = np.clip(bbox[3] + context * h, 0, height - 1)
-
-        img = img.crop(bbox)
-
-        if self.transform is not None:
-            img = self._transform_image(self.transform, self.k_tfm, img)
-        return {"img": img, "pid": pid, "camid": camid, "impath": img_path, "dsetid": dsetid}
+        return self._crop_and_transform(index)
 
