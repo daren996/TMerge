@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 from typing import Sequence
 
 from tmerge.config.loader import load_yaml_config
+from tmerge.config.validation import ConfigValidationError, validate_config
 from tmerge.core.factory import build_pipeline
 from tmerge.core.runtime import RuntimeContext
 from tmerge.training.reid import run_reid_training
@@ -56,7 +58,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger = configure_logging(verbose=args.verbose)
     context = RuntimeContext(logger=logger)
 
-    config = load_yaml_config(args.config, args.overrides)
+    try:
+        config = load_yaml_config(args.config, args.overrides)
+        validate_config(config)
+    except (ValueError, ConfigValidationError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
 
     if args.command == "train" and args.train_command == "reid":
         return run_reid_training(config)
@@ -64,4 +71,3 @@ def main(argv: Sequence[str] | None = None) -> int:
     pipeline = build_pipeline(config, context=context)
     pipeline.run()
     return 0
-

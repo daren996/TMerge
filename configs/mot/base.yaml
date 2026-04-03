@@ -1,0 +1,10 @@
+version: 1
+pipeline:
+  name: mot-base
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_MOT_INPUT}
+    - type: reporter.progress
+      report_interval: 100
+      log_prefix: mot
+

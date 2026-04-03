@@ -1,0 +1,27 @@
+extends: base.yaml
+pipeline:
+  name: mot-mmdet-sort
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_MOT_INPUT}
+    - type: integration.openmmlab.mmdet_detector_with_features
+      config_file: ${TMERGE_MMDET_CONFIG}
+      checkpoint_file: ${TMERGE_MMDET_CHECKPOINT}
+      device: ${TMERGE_DEVICE}
+      img_scale: [1088, 1088]
+    - type: integration.openmmlab.mmtracking_sort
+      device: ${TMERGE_DEVICE}
+      motion:
+        type: KalmanFilter
+        center_only: false
+      tracker:
+        type: SortTracker
+        obj_score_thr: 0.5
+        match_iou_thr: 0.5
+        reid: null
+    - type: sink.mot_result
+      path: ${TMERGE_OUTPUT}
+    - type: reporter.progress
+      report_interval: 100
+      log_prefix: mot-mmdet-sort
+

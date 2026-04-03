@@ -1,0 +1,66 @@
+extends: base.yaml
+pipeline:
+  name: mot-mmdet-deepsort
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_MOT_INPUT}
+    - type: integration.openmmlab.mmdet_detector_with_features
+      config_file: ${TMERGE_MMDET_CONFIG}
+      checkpoint_file: ${TMERGE_MMDET_CHECKPOINT}
+      device: ${TMERGE_DEVICE}
+      img_scale: [1088, 1088]
+    - type: integration.openmmlab.mmtracking_deepsort
+      device: ${TMERGE_DEVICE}
+      pretrains:
+        reid: https://download.openmmlab.com/mmtracking/mot/reid/tracktor_reid_r50_iter25245-a452f51f.pth
+      motion:
+        type: KalmanFilter
+        center_only: false
+      reid:
+        type: BaseReID
+        backbone:
+          type: ResNet
+          depth: 50
+          num_stages: 4
+          out_indices: [3]
+          style: pytorch
+        neck:
+          type: GlobalAveragePooling
+          kernel_size: [8, 4]
+          stride: 1
+        head:
+          type: LinearReIDHead
+          num_fcs: 1
+          in_channels: 2048
+          fc_channels: 1024
+          out_channels: 128
+          num_classes: 378
+          loss:
+            type: CrossEntropyLoss
+            loss_weight: 1.0
+          loss_pairwise:
+            type: TripletLoss
+            margin: 0.3
+            loss_weight: 1.0
+          norm_cfg:
+            type: BN1d
+          act_cfg:
+            type: ReLU
+      tracker:
+        type: SortTracker
+        obj_score_thr: 0.5
+        reid:
+          num_samples: 10
+          img_scale: [256, 128]
+          img_norm_cfg: null
+          match_score_thr: 2.0
+        match_iou_thr: 0.5
+        momentums: null
+        num_tentatives: 2
+        num_frames_retain: 100
+    - type: sink.mot_result
+      path: ${TMERGE_OUTPUT}
+    - type: reporter.progress
+      report_interval: 100
+      log_prefix: mot-mmdet-deepsort
+

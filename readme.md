@@ -1,30 +1,29 @@
 # TMerge
 
-TMerge is a modernized research engineering toolkit for video query processing,
-track merging experiments, and reproducible evaluation workflows.
+TMerge is a research engineering toolkit for video query processing, track
+merging experiments, and reproducible evaluation workflows.
 
-This repository keeps the original research assets, but the recommended way to
-use the project is now through the installable `tmerge` package, YAML configs,
-and the unified CLI.
+The repository includes two layers:
 
-## What Changed
+- a packaged runtime under `src/tmerge` for CLI-driven pipelines and training
+- legacy research code under `videosys`, `e2e`, and `scripts` for reference and
+  dataset-specific experiments
 
-The repository no longer treats sibling checkouts such as `mmdetection` and
-`mmtracking` as the default operating model.
+## Overview
 
-The new baseline is:
+TMerge is organized around YAML configuration files and a single CLI entrypoint.
+The main workflows currently covered by the package are:
 
-- install the project as a package
-- run pipelines through `tmerge`
-- describe workflows in YAML instead of Python config scripts
-- treat heavy research integrations as optional adapters
+- running pipeline jobs
+- exporting tracks and track features
+- launching ReID training workflows
 
-Legacy code under `videosys/`, `e2e/`, and `scripts/` remains in the repository
-as migration material, but it is no longer the primary interface.
+Optional integrations such as OpenMMLab and TorchReID are installed only when
+needed.
 
-## Quick Start
+## Installation
 
-Install the core runtime:
+Install the core package:
 
 ```bash
 python -m pip install -e .
@@ -42,7 +41,11 @@ Install optional research integrations:
 python -m pip install -e ".[dev,openmmlab,reid]"
 ```
 
-Run the minimal image-copy example:
+The project requires Python 3.10 or newer.
+
+## Quick Start
+
+Run the example pipeline:
 
 ```bash
 export TMERGE_INPUT_DIR=/path/to/images
@@ -50,9 +53,84 @@ export TMERGE_OUTPUT_DIR=/path/to/output
 tmerge run pipeline examples/pipeline.image-copy.yaml
 ```
 
+Example configs are available in `examples/`:
+
+- `examples/pipeline.image-copy.yaml`
+- `examples/export.track-features.yaml`
+- `examples/train.reid.yaml`
+
+## How To Use
+
+### Run a local smoke test
+
+This verifies the new packaged runtime without any heavy external dependency:
+
+```bash
+export TMERGE_INPUT_DIR=/path/to/images
+export TMERGE_OUTPUT_DIR=/tmp/tmerge-output
+tmerge run pipeline examples/pipeline.image-copy.yaml
+```
+
+### Run the migrated MOT pipelines
+
+The most common MOT workflows now live under `configs/mot/`.
+
+Set the shared runtime variables:
+
+```bash
+export TMERGE_DEVICE=cuda:0
+export TMERGE_MOT_INPUT=/path/to/MOT17/train/MOT17-11-DPM/img1
+export TMERGE_MMDET_CONFIG=/path/to/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py
+export TMERGE_MMDET_CHECKPOINT=/path/to/checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+export TMERGE_OUTPUT=/tmp/MOT17-11-DPM-faster_rcnn-sort.txt
+```
+
+Run SORT:
+
+```bash
+tmerge run pipeline configs/mot/mmdet_sort.yaml
+```
+
+Run DeepSORT:
+
+```bash
+tmerge run pipeline configs/mot/mmdet_deepsort.yaml
+```
+
+Run Tracktor:
+
+```bash
+tmerge run pipeline configs/mot/mmdet_tracktor.yaml
+```
+
+### Export track features
+
+```bash
+export TMERGE_INPUT_DIR=/path/to/images
+export TMERGE_MOT_RESULT=/path/to/results.txt
+export TMERGE_REID_MODEL=/path/to/model.pth
+export TMERGE_OUTPUT_PKL=/tmp/track-features.pkl
+tmerge export features examples/export.track-features.yaml
+```
+
+### Train ReID
+
+```bash
+tmerge train reid examples/train.reid.yaml
+```
+
+### Override config values from the CLI
+
+```bash
+tmerge run pipeline configs/mot/mmdet_sort.yaml \
+  --set pipeline.name=mot-debug \
+  --set pipeline.operators.2.tracker.match_iou_thr=0.4 \
+  --set pipeline.operators.3.path=/tmp/debug-output.txt
+```
+
 ## CLI
 
-The modern CLI is the only recommended public entrypoint.
+The package exposes the `tmerge` command:
 
 ```bash
 tmerge run pipeline <config.yaml>
@@ -61,20 +139,19 @@ tmerge export features <config.yaml>
 tmerge train reid <config.yaml>
 ```
 
-You can override config values without editing files:
+Configuration values can be overridden from the command line:
 
 ```bash
 tmerge run pipeline config.yaml --set pipeline.name=debug --set pipeline.operators.1.report_interval=10
 ```
 
-## Config Model
+## Configuration
 
-Pipeline configs are YAML documents with an ordered operator list.
-The first operator must be a source.
-
-Example:
+Pipeline configs are YAML documents with an ordered operator list. A minimal
+pipeline looks like this:
 
 ```yaml
+version: 1
 pipeline:
   name: copy-images
   operators:
@@ -86,55 +163,67 @@ pipeline:
       path: /tmp/output
 ```
 
-Supported built-in operators currently cover:
+Common operator groups include:
 
-- image and video sources
-- progress reporting
-- MOT result loading
-- frame and video sinks
-- MOT result export
-- track feature export
-- simple detection-to-track conversion
+- source operators for images and videos
+- reporting operators for runtime progress
+- IO helpers for MOT result loading
+- sink operators for frames, videos, results, and features
+- integration adapters for external research tooling
 
-Optional adapters also exist for selected legacy OpenMMLab and TorchReID
-workflows.
+Configs are validated before execution. The validator catches issues such as:
 
-## Project Layout
+- missing `pipeline` or `training` sections
+- empty `pipeline.operators`
+- first operator not being a `source.*`
+- unknown operator types
+- missing required fields like `path`, `config_file`, or `checkpoint_file`
 
-The modernization introduces a clear split between new infrastructure and legacy
-research assets:
+When validation fails, the CLI reports field-level errors and exits before the
+runtime starts.
 
-- `src/tmerge/`: modern package, runtime, CLI, config loading, adapters
-- `tests/`: unit and integration tests for the new workflow
-- `examples/`: runnable YAML examples
+## Repository Layout
+
+- `src/tmerge/`: packaged runtime, CLI, config loader, operators, and training
+- `examples/`: sample YAML configs
+- `tests/`: unit and integration tests for the packaged workflow
 - `docs/appendix/`: dependency and migration notes
-- `videosys/`, `e2e/`, `scripts/`: legacy implementation and experiment assets
+- `docs/*.md`: dataset and script cheat sheets
+- `videosys/`, `e2e/`, `scripts/`: legacy research and experiment code
 
 ## Development
 
-Run tests:
+Run the test suite:
 
 ```bash
 pytest
 ```
 
-Useful checks:
+Run the main checks:
 
 ```bash
 ruff check .
 mypy src
 ```
 
-## Legacy Integrations
+## Documentation
 
-Heavy integrations are now optional by design.
+- `docs/appendix/dependencies.md`: dependency layout and install options
+- `docs/appendix/migration.md`: notes on the package-first workflow
+- `docs/mot_cheatsheet.md`: MOT-related commands
+- `docs/kitti_cheatsheet.md`: KITTI-related commands
+- `docs/pathtrack_cheatsheet.md`: PathTrack-related commands
+- `docs/e2e_cheatsheet.md`: end-to-end workflow notes
+- `docs/script_cheatsheet.md`: script usage reference
+- `docs/trouble_shooting.md`: troubleshooting notes
 
-- OpenMMLab operators are exposed through the `integration.openmmlab.*` operator family.
-- TorchReID extraction is exposed through `integration.reid.torchreid_extractor`.
-- ReID training is available through `tmerge train reid`.
+## MOT Migration Map
 
-These adapters intentionally live outside the core runtime so the main package
-can stay installable and testable without large external frameworks.
+The following legacy experiment configs now have YAML replacements:
+
+- `e2e/configs/tracking/mmt_sort_private.py` -> `configs/mot/mmdet_sort.yaml`
+- `e2e/configs/tracking/mmt_deepsort_private.py` -> `configs/mot/mmdet_deepsort.yaml`
+- `e2e/configs/tracking/mmt_tracktor_private.py` -> `configs/mot/mmdet_tracktor.yaml`
 
 ## Citation
 
