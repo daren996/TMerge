@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
@@ -15,6 +15,7 @@ from tmerge.models.types import FramePacket, ImageFolderMeta, VideoMeta
 @dataclass(slots=True)
 class ImageFolderSource(Source):
     path: Path
+    _images: list[Path] = field(init=False, default_factory=list)
 
     @classmethod
     def from_config(cls, config: dict[str, object]) -> "ImageFolderSource":
@@ -44,6 +45,7 @@ class ImageFolderSource(Source):
 @dataclass(slots=True)
 class VideoSource(Source):
     path: Path
+    _capture: object = field(init=False, default=None)
 
     @classmethod
     def from_config(cls, config: dict[str, object]) -> "VideoSource":
