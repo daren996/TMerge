@@ -1,1 +1,0 @@
-To run tests, execute `python -m unittest discover -v -s ./tests` from the project's root folder.

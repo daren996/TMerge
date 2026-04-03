@@ -1,2 +1,0 @@
-CURRENT_FOLDER=$(pwd)
-export PYTHONPATH=$CURRENT_FOLDER:$CURRENT_FOLDER/../mmdetection/:$CURRENT_FOLDER/../CenterNet/src/:$CURRENT_FOLDER/../mmtracking/:$CURRENT_FOLDER/../CenterTrack/src/:$CURRENT_FOLDER/../UMA-MOT/:$CURRENT_FOLDER/../deep-person-reid/

@@ -1,0 +1,2 @@
+[console_scripts]
+tmerge = tmerge.cli.main:main

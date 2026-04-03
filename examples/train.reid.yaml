@@ -1,0 +1,6 @@
+version: 1
+training:
+  backend: legacy_torchreid
+  config_file: config/train/reid/mot_osnet_x1_0_softmax_256x128_amsgrad.yaml
+  extra_args: []
+

@@ -1,0 +1,14 @@
+version: 1
+pipeline:
+  name: export-track-features
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_INPUT_DIR}
+    - type: io.mot_result_loader
+      path: ${TMERGE_MOT_RESULT}
+    - type: integration.reid.torchreid_extractor
+      model_name: osnet_x1_0
+      model_path: ${TMERGE_REID_MODEL}
+    - type: sink.track_features
+      path: ${TMERGE_OUTPUT_PKL}
+

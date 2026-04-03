@@ -1,0 +1,12 @@
+version: 1
+pipeline:
+  name: copy-images
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_INPUT_DIR}
+    - type: reporter.progress
+      report_interval: 10
+      log_prefix: image-copy
+    - type: sink.image_folder
+      path: ${TMERGE_OUTPUT_DIR}
+

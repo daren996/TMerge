@@ -11,3 +11,9 @@ reid-data/
 .env
 .env.*
 command_history.txt
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
