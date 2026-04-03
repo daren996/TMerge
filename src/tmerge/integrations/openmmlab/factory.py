@@ -6,6 +6,7 @@ from typing import Any
 
 from tmerge.integrations.openmmlab.native_ops import (
     MMDetDetector,
+    MMTrackReIdExtractor,
     MMTrackingMOTOperator,
     MMTrackingSortOperator,
     TorchReIdExtractor,
@@ -21,6 +22,7 @@ def register_openmmlab(registry: Any) -> None:
             "integration.openmmlab.mmtracking_sort": _build_mmtracking_sort,
             "integration.openmmlab.mmtracking_deepsort": _build_mmtracking_deepsort,
             "integration.openmmlab.mmtracking_tracktor": _build_mmtracking_tracktor,
+            "integration.openmmlab.mmtrack_reid_extractor": MMTrackReIdExtractor.from_config,
             "integration.reid.torchreid_extractor": TorchReIdExtractor.from_config,
         }
     )

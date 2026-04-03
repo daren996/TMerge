@@ -8,8 +8,6 @@ from tmerge.evaluation.mot import evaluate_mot_results
 from tmerge.mot.filtering import filter_mot_results
 from tmerge.mot.reporting import save_mot_batch_report
 from tmerge.mot.statistics import save_mot_track_statistics
-from pathlib import Path
-
 from tmerge.visualization.mot import export_mot_video, visualize_mot_results
 
 

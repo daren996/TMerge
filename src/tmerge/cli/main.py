@@ -11,6 +11,7 @@ from tmerge.config.loader import load_yaml_config
 from tmerge.config.validation import ConfigValidationError, validate_config
 from tmerge.core.factory import build_pipeline
 from tmerge.core.runtime import RuntimeContext
+from tmerge.export.commands import run_export_video as run_plain_export_video
 from tmerge.mot.commands import (
     run_batch_report,
     run_evaluate,
@@ -40,6 +41,10 @@ def build_parser() -> argparse.ArgumentParser:
     _add_config_args(export_tracks)
     export_features = export_subparsers.add_parser("features", help="Export track features")
     _add_config_args(export_features)
+    export_video_parser = export_subparsers.add_parser("video", help="Generate a plain video from an image folder")
+    export_video_parser.add_argument("--data", required=True, type=Path)
+    export_video_parser.add_argument("--output", required=True, type=Path)
+    export_video_parser.add_argument("--fps", type=float, default=30.0)
 
     train_parser = subparsers.add_parser("train", help="Run model training workflows")
     train_subparsers = train_parser.add_subparsers(dest="train_command", required=True)
@@ -129,6 +134,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.mot_command == "batch-report":
             return run_batch_report(args)
         parser.error(f"Unknown MOT subcommand: {args.mot_command}")
+
+    if args.command == "export" and args.export_command == "video":
+        return run_plain_export_video(args)
 
     try:
         config = load_yaml_config(args.config, args.overrides)

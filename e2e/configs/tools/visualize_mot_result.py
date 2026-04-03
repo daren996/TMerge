@@ -1,3 +1,9 @@
+"""Legacy tool config.
+
+Superseded by:
+    tmerge mot visualize --data ... --result ...
+"""
+
 from videosys.ingestion.debugger.operators import SkipToFrame
 from videosys.ingestion.observer.reporter import ProgressReporter
 from videosys.ingestion.io.loaders import MOTResultLoader

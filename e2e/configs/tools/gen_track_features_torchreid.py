@@ -1,4 +1,10 @@
 # pylint: disable-all
+"""Legacy tool config.
+
+Preferred modern path:
+    tmerge export features examples/export.track-features.yaml
+"""
+
 from videosys.ingestion.reid.io import TrackFeatureSink
 from videosys.ingestion.observer.reporter import ProgressReporter
 from videosys.ingestion.reid.bgs import BackgroundSubtraction

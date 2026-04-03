@@ -1,3 +1,9 @@
+"""Legacy tool config.
+
+Preferred modern path:
+    tmerge export features examples/export.track-features-openmmlab.yaml
+"""
+
 from videosys.ingestion.compat.mmlib import MMLibCompatable, MMLibMoveData, MMMultiScaleFlipAug
 from videosys.ingestion.io.loaders import MOTResultLoader
 from videosys.ingestion.reid.io import TrackFeatureSink

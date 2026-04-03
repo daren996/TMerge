@@ -36,6 +36,7 @@ PIPELINE_OPERATOR_RULES: dict[str, tuple[str, ...]] = {
     "integration.openmmlab.mmtracking_sort": (),
     "integration.openmmlab.mmtracking_deepsort": (),
     "integration.openmmlab.mmtracking_tracktor": (),
+    "integration.openmmlab.mmtrack_reid_extractor": ("backbone", "neck", "head"),
     "integration.reid.torchreid_extractor": ("model_name", "model_path"),
 }
 

@@ -1,3 +1,9 @@
+"""Legacy tool config.
+
+Superseded by:
+    tmerge mot export-video --data ... --result ... --output ...
+"""
+
 from videosys.ingestion.observer.reporter import ProgressReporter
 from videosys.ingestion.io.loaders import MOTResultLoader
 from videosys.ingestion.visualize.track import ObjectTrackingVisualizer

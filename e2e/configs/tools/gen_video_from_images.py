@@ -1,3 +1,9 @@
+"""Legacy tool config.
+
+Superseded by:
+    tmerge export video --data ... --output ... --fps ...
+"""
+
 from videosys.ingestion.io.base import ImageSource, VideoSink
 
 description = 'generate video from images'

@@ -23,6 +23,8 @@ The repository now follows a package-first structure.
   legacy training code.
 - `e2e/`
   Historical Python-config pipeline runner and experiment entrypoints.
+  Many tool-style workflows here are now superseded by `tmerge mot ...` and
+  `tmerge export ...`.
 - `scripts/`
   Historical task scripts and dataset-specific helpers.
 

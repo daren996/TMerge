@@ -1,0 +1,43 @@
+version: 1
+pipeline:
+  name: export-track-features-openmmlab
+  operators:
+    - type: source.image_folder
+      path: ${TMERGE_INPUT_DIR}
+    - type: io.mot_result_loader
+      path: ${TMERGE_MOT_RESULT}
+    - type: integration.openmmlab.mmtrack_reid_extractor
+      backbone:
+        type: ResNet
+        depth: 50
+        num_stages: 4
+        out_indices: [3]
+        style: pytorch
+      neck:
+        type: GlobalAveragePooling
+        kernel_size: [8, 4]
+        stride: 1
+      head:
+        type: LinearReIDHead
+        num_fcs: 1
+        in_channels: 2048
+        fc_channels: 1024
+        out_channels: 128
+        num_classes: 378
+        loss:
+          type: CrossEntropyLoss
+          loss_weight: 1.0
+        loss_pairwise:
+          type: TripletLoss
+          margin: 0.3
+          loss_weight: 1.0
+        norm_cfg:
+          type: BN1d
+        act_cfg:
+          type: ReLU
+      img_scale: [256, 128]
+      rescale: true
+      device: ${TMERGE_DEVICE}
+    - type: sink.track_features
+      path: ${TMERGE_OUTPUT_PKL}
+

@@ -63,6 +63,7 @@ Example configs are available in `examples/`:
 
 - `examples/pipeline.image-copy.yaml`
 - `examples/export.track-features.yaml`
+- `examples/export.track-features-openmmlab.yaml`
 - `examples/train.reid.yaml`
 
 ## How To Use
@@ -119,6 +120,22 @@ export TMERGE_OUTPUT_PKL=/tmp/track-features.pkl
 tmerge export features examples/export.track-features.yaml
 ```
 
+If you want the older OpenMMLab-style ReID feature extraction path:
+
+```bash
+export TMERGE_DEVICE=cuda:0
+tmerge export features examples/export.track-features-openmmlab.yaml
+```
+
+### Generate a plain video from images
+
+```bash
+tmerge export video \
+  --data /path/to/image-folder \
+  --output /tmp/output.mp4 \
+  --fps 30
+```
+
 ### Train ReID
 
 ```bash
@@ -158,6 +175,36 @@ tmerge mot export-video \
   --fps 30
 ```
 
+Filter MOT results before downstream ReID or analysis:
+
+```bash
+tmerge mot filter \
+  --result /tmp/MOT17-11-DPM-faster_rcnn-sort.txt \
+  --output /tmp/MOT17-11-DPM-faster_rcnn-sort.filtered.txt \
+  --image-dir /path/to/MOT17/train/MOT17-11-DPM/img1 \
+  --min-frames 100 \
+  --drop-border-boxes
+```
+
+Compute track duration statistics:
+
+```bash
+tmerge mot statistics \
+  --result /tmp/MOT17-11-DPM-faster_rcnn-sort.txt \
+  --output-csv /tmp/MOT17-11-DPM-stats.csv \
+  --output-plot /tmp/MOT17-11-DPM-stats.png
+```
+
+Generate a batch evaluation report:
+
+```bash
+tmerge mot batch-report \
+  --ground-truth /path/to/MOT17/train/MOT17-11-DPM/gt/gt.txt \
+  --method sort=/tmp/sort.txt \
+  --method deepsort=/tmp/deepsort.txt \
+  --output-csv /tmp/MOT17-11-DPM-report.csv
+```
+
 ### Override config values from the CLI
 
 ```bash
@@ -176,8 +223,12 @@ tmerge run pipeline <config.yaml>
 tmerge mot evaluate --ground-truth <gt.txt> --result <result.txt>
 tmerge mot visualize --data <img-dir-or-video> --result <result.txt>
 tmerge mot export-video --data <img-dir-or-video> --result <result.txt> --output <out.mp4>
+tmerge mot filter --result <result.txt> --output <filtered.txt> [--image-dir <img-dir>]
+tmerge mot statistics --result <result.txt> [--output-csv <stats.csv>] [--output-plot <stats.png>]
+tmerge mot batch-report --ground-truth <gt.txt> --method <name=path> [--method <name=path> ...]
 tmerge export tracks <config.yaml>
 tmerge export features <config.yaml>
+tmerge export video --data <img-dir> --output <out.mp4> [--fps 30]
 tmerge train reid <config.yaml>
 ```
 
@@ -262,6 +313,7 @@ mypy src
 - `docs/appendix/dependencies.md`: dependency layout and install options
 - `docs/appendix/migration.md`: notes on the package-first workflow
 - `docs/appendix/project-layout.md`: directory responsibilities and naming guidance
+- `docs/appendix/legacy-e2e-tools.md`: which old e2e tools are now superseded
 - `docs/mot_cheatsheet.md`: MOT-related commands
 - `docs/kitti_cheatsheet.md`: KITTI-related commands
 - `docs/pathtrack_cheatsheet.md`: PathTrack-related commands
@@ -277,6 +329,18 @@ The following legacy experiment configs now have YAML replacements:
 - `e2e/configs/tracking/mmt_deepsort_private.py` -> `configs/mot/mmdet_deepsort.yaml`
 - `e2e/configs/tracking/mmt_tracktor_private.py` -> `configs/mot/mmdet_tracktor.yaml`
 - `config/train/reid/*.yaml` -> `configs/training/reid/*.yaml`
+
+The following legacy tools now have direct CLI replacements:
+
+- `e2e/configs/tools/gen_mot_result_video.py` -> `tmerge mot export-video`
+- `e2e/configs/tools/visualize_mot_result.py` -> `tmerge mot visualize`
+- `e2e/configs/tools/gen_track_features.py` -> `tmerge export features examples/export.track-features-openmmlab.yaml`
+- `e2e/configs/tools/gen_track_features_torchreid.py` -> `tmerge export features examples/export.track-features.yaml`
+- `e2e/configs/tools/gen_video_from_images.py` -> `tmerge export video`
+- `e2e/simple/mot_eval.py` -> `tmerge mot evaluate`
+- `scripts/mot/reid/filter_track_results.py` -> `tmerge mot filter`
+- `scripts/mot/cal_statistics.py` -> `tmerge mot statistics`
+- `scripts/mot/eval_mot_methods.py` -> `tmerge mot batch-report`
 
 ## Citation
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -343,6 +342,88 @@ class TorchReIdExtractor(Operator):
         return packet
 
 
+@dataclass(slots=True)
+class MMTrackReIdExtractor(Operator):
+    backbone: dict[str, Any]
+    neck: dict[str, Any]
+    head: dict[str, Any]
+    img_scale: tuple[int, int] | None = None
+    rescale: bool = False
+    device: str = "cuda:0"
+    transforms: list[dict[str, Any]] = field(default_factory=list)
+
+    @classmethod
+    def from_config(cls, config: dict[str, Any]) -> "MMTrackReIdExtractor":
+        return cls(
+            backbone=dict(config["backbone"]),
+            neck=dict(config["neck"]),
+            head=dict(config["head"]),
+            img_scale=tuple(config["img_scale"]) if config.get("img_scale") else None,
+            rescale=bool(config.get("rescale", False)),
+            device=str(config.get("device", "cuda:0")),
+            transforms=list(config.get("transforms", _default_reid_transforms())),
+        )
+
+    def prepare(self, context: RuntimeContext) -> None:
+        self._torch = _require_module("torch", 'python -m pip install -e ".[openmmlab]"')
+        self._F = _require_module("torch.nn.functional", 'python -m pip install -e ".[openmmlab]"')
+        base_reid_module = _require_module(
+            "mmtrack.models.reid.base_reid",
+            'python -m pip install -e ".[openmmlab]"',
+        )
+        self._model = base_reid_module.BaseReID(
+            backbone=self.backbone,
+            neck=self.neck,
+            head=self.head,
+        )
+        self._model.to(self.device)
+        self._model.eval()
+
+    def process(self, packet: FramePacket, context: RuntimeContext) -> FramePacket:
+        if not packet.tracks:
+            packet.track_features = []
+            return packet
+        sample = _build_mmlib_sample(packet.frame, self.transforms, (1088, 1088), self.device)
+        reid_img = sample["img"][0]
+        img_metas = sample["img_metas"][0]
+        bboxes = self._torch.tensor([track.bbox for track in packet.tracks])
+        with self._torch.no_grad():
+            features = self._model.simple_test(self._crop_imgs(reid_img, img_metas, bboxes, self.rescale))
+        packet.track_features = [
+            TrackFeature(uid=track.uid, bbox=track.bbox, feature=feature.cpu())
+            for track, feature in zip(packet.tracks, features)
+        ]
+        return packet
+
+    def _crop_imgs(self, img, img_metas, bboxes, rescale=False):
+        h, w, _ = img_metas[0]["img_shape"]
+        img = img[:, :, :h, :w]
+        if rescale:
+            bboxes[:, :4] *= self._torch.tensor(img_metas[0]["scale_factor"]).to(bboxes.device)
+        bboxes[:, 0::2] = self._torch.clamp(bboxes[:, 0::2], min=0, max=w)
+        bboxes[:, 1::2] = self._torch.clamp(bboxes[:, 1::2], min=0, max=h)
+
+        crop_imgs = []
+        for bbox in bboxes:
+            x1, y1, x2, y2 = map(int, bbox)
+            if x2 == x1:
+                x2 += 1
+            if y2 == y1:
+                y2 += 1
+            crop_img = img[:, :, y1:y2, x1:x2]
+            if self.img_scale:
+                crop_img = self._F.interpolate(
+                    crop_img,
+                    size=self.img_scale,
+                    mode="bilinear",
+                    align_corners=False,
+                )
+            crop_imgs.append(crop_img)
+        if crop_imgs:
+            return self._torch.cat(crop_imgs, dim=0)
+        return img.new_zeros((0,))
+
+
 def _default_transforms() -> list[dict[str, Any]]:
     return [
         {"type": "Resize", "keep_ratio": True},
@@ -356,4 +437,20 @@ def _default_transforms() -> list[dict[str, Any]]:
         {"type": "Pad", "size_divisor": 32},
         {"type": "ImageToTensor", "keys": ["img"]},
         {"type": "VideoCollect", "keys": ["img"]},
+    ]
+
+
+def _default_reid_transforms() -> list[dict[str, Any]]:
+    return [
+        {"type": "Resize", "keep_ratio": True},
+        {"type": "RandomFlip"},
+        {
+            "type": "Normalize",
+            "mean": [123.675, 116.28, 103.53],
+            "std": [58.395, 57.12, 57.375],
+            "to_rgb": True,
+        },
+        {"type": "Pad", "size_divisor": 32},
+        {"type": "ImageToTensor", "keys": ["img"]},
+        {"type": "Collect", "keys": ["img"]},
     ]
