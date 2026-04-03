@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tmerge.config.loader import load_yaml_config
 from tmerge.config.validation import ConfigValidationError, validate_config
 
@@ -48,7 +50,10 @@ def test_validate_config_rejects_non_source_first_operator() -> None:
         raise AssertionError("Expected validation to fail")
 
 
-def test_validate_config_accepts_mot_sort_shape(monkeypatch, tmp_path: Path) -> None:
+def test_validate_config_accepts_mot_sort_shape(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
     input_dir = tmp_path / "img1"
     input_dir.mkdir()
     monkeypatch.setenv("TMERGE_MOT_INPUT", str(input_dir))

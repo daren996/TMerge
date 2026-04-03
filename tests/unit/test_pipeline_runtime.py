@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 import logging
 
@@ -11,7 +12,7 @@ from tmerge.models.types import FramePacket
 
 @dataclass(slots=True)
 class DummySource(Source):
-    def frames(self, context: RuntimeContext):
+    def frames(self, context: RuntimeContext) -> Iterable[FramePacket]:
         for frame_id in range(1, 3):
             yield FramePacket(frame_id=frame_id, frame=np.zeros((2, 2, 3), dtype=np.uint8))
 
@@ -30,4 +31,3 @@ def test_pipeline_runs_all_packets() -> None:
     pipeline.run()
 
     assert context.get("count") == 2
-

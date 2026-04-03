@@ -40,6 +40,7 @@ PIPELINE_OPERATOR_RULES: dict[str, tuple[str, ...]] = {
 }
 
 TRAINING_RULES: dict[str, tuple[str, ...]] = {
+    "tmerge_torchreid": ("config_file",),
     "legacy_torchreid": ("config_file",),
 }
 
@@ -133,4 +134,3 @@ def _validate_training(training: Any, issues: list[ValidationIssue]) -> None:
         value = training.get(field_name)
         if value is None or value == "":
             issues.append(ValidationIssue(path=f"training.{field_name}", message="is required"))
-

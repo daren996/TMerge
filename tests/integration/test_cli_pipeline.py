@@ -8,7 +8,7 @@ import numpy as np
 from tmerge.cli.main import main
 
 
-def test_cli_runs_image_copy_pipeline(tmp_path: Path, monkeypatch) -> None:
+def test_cli_runs_image_copy_pipeline(tmp_path: Path) -> None:
     input_dir = tmp_path / "input"
     output_dir = tmp_path / "output"
     input_dir.mkdir()
@@ -36,4 +36,3 @@ def test_cli_runs_image_copy_pipeline(tmp_path: Path, monkeypatch) -> None:
     assert exit_code == 0
     assert (output_dir / "000001.png").exists()
     assert (output_dir / "000002.png").exists()
-

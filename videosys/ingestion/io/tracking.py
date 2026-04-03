@@ -1,86 +1,113 @@
-import os
+"""Tracking result sinks for legacy `videosys` pipelines."""
 
-from videosys.ingestion.base import Operator
+from __future__ import annotations
+
+from collections.abc import MutableMapping, Sequence
+from pathlib import Path
+from typing import Any
+
 from videosys.ingestion import fields
+from videosys.ingestion.base import Operator
+
+Tables = MutableMapping[str, Any]
 
 
 class AbstractTrackResultSink(Operator):
+    """Base sink for serializing tracking results."""
 
-    def __init__(self, save_at_end=False):
+    def __init__(self, save_at_end: bool = False) -> None:
         super().__init__()
-        self.__save_at_end = save_at_end
-        self.__buffers = []
+        self._save_at_end = save_at_end
+        self._buffers: list[Tables] = []
 
-    def store(self, fid, track_results):
-        pass
+    def store(self, fid: int, track_results: Sequence[object]) -> None:
+        """Persist one frame of tracking results."""
 
-    def process(self, tables):
-        # tables -> results in one frame 
-        if not self.__save_at_end:
+    def process(self, tables: Tables) -> None:
+        if not self._save_at_end:
             track_results = tables[fields.DATA_OBJECT_TRACK]
-            fid = tables[fields.DATA_FRAME_ID]
-            self.store(fid, track_results)
+            frame_id = tables[fields.DATA_FRAME_ID]
+            self.store(frame_id, track_results)
         else:
-            self.__buffers.append(tables)
+            self._buffers.append(dict(tables))
         self.collector.emit(tables)
 
-    def cleanup(self):
-        if self.__save_at_end:
-            for tables in self.__buffers:
+    def cleanup(self) -> None:
+        if self._save_at_end:
+            for tables in self._buffers:
                 track_results = tables[fields.DATA_OBJECT_TRACK]
-                fid = tables[fields.DATA_FRAME_ID]
-                self.store(fid, track_results)
+                frame_id = tables[fields.DATA_FRAME_ID]
+                self.store(frame_id, track_results)
 
 
 class TrackResultFolderSink(AbstractTrackResultSink):
-    def __init__(self, output_folder, **kwargs):
-        self.output_folder = output_folder
+    """Write one text file per frame into an output folder."""
+
+    def __init__(self, output_folder: str | Path, **kwargs: Any) -> None:
+        self.output_folder = Path(output_folder)
+        self.file_path = self.output_folder
         super().__init__(**kwargs)
 
-    def prepare(self):
-        file_path = self.output_folder
-        # create if not exist
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-        self.file_path = file_path
+    def prepare(self) -> None:
+        self.file_path.mkdir(parents=True, exist_ok=True)
 
-    def store(self, fid, track_results):
-        with open('{}/{}.txt'.format(self.file_path, fid), 'w') as f:
+    def store(self, fid: int, track_results: Sequence[object]) -> None:
+        output_path = self.file_path / f"{fid}.txt"
+        with output_path.open("w", encoding="utf-8") as handle:
             for tracklet in track_results:
-                # FIXME: we assume the payload is of type ObjectDetectionResult
-                assert tracklet.payload is not None
-                f.write('{};{};{};{}'.format(tracklet.uid, tracklet.bbox,
-                                             tracklet.payload.label, tracklet.payload.confidence))
-                f.write('\n')
+                if getattr(tracklet, "payload", None) is None:
+                    raise ValueError("TrackResultFolderSink expects track payload metadata to be present.")
+                handle.write(
+                    f"{tracklet.uid};{tracklet.bbox};{tracklet.payload.label};"
+                    f"{tracklet.payload.confidence}\n"
+                )
 
 
 class MOTResultSink(AbstractTrackResultSink):
-    def __init__(self, path, add_type_column=False, **kwargs):
-        self.output_path = path
+    """Append tracking results to a MOT-format text file."""
+
+    def __init__(self, path: str | Path, add_type_column: bool = False, **kwargs: Any) -> None:
+        self.output_path = Path(path)
         self.add_type_column = add_type_column
+        self.file_path = self.output_path
         super().__init__(**kwargs)
 
-    def prepare(self):
-        file_path = self.output_path
-        parent = os.path.dirname(file_path)
-        if not os.path.exists(parent):
-            os.makedirs(parent)
-        # empty file.
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        self.file_path = file_path
+    def prepare(self) -> None:
+        self.output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.output_path.write_text("", encoding="utf-8")
+        self.file_path = self.output_path
 
-    def store(self, fid, track_results):
-        with open(self.file_path, 'a+') as f:
-            for t in track_results:
+    def store(self, fid: int, track_results: Sequence[object]) -> None:
+        with self.file_path.open("a", encoding="utf-8") as handle:
+            for tracklet in track_results:
                 if self.add_type_column:
-                    f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{},{}'
-                            .format(fid, t.uid, t.bbox[0], t.bbox[1],
-                                    t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1],
-                                    t.confidence, t.label, -1, -1, -1))
+                    handle.write(
+                        "{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{},{}\n".format(
+                            fid,
+                            tracklet.uid,
+                            tracklet.bbox[0],
+                            tracklet.bbox[1],
+                            tracklet.bbox[2] - tracklet.bbox[0],
+                            tracklet.bbox[3] - tracklet.bbox[1],
+                            tracklet.confidence,
+                            tracklet.label,
+                            -1,
+                            -1,
+                            -1,
+                        )
+                    )
                 else:
-                    f.write('{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}'
-                            .format(fid, t.uid, t.bbox[0], t.bbox[1],
-                                    t.bbox[2] - t.bbox[0], t.bbox[3] - t.bbox[1],
-                                    t.confidence, -1, -1, -1))
-                f.write('\n')
+                    handle.write(
+                        "{},{},{:.2f},{:.2f},{:.2f},{:.2f},{},{},{},{}\n".format(
+                            fid,
+                            tracklet.uid,
+                            tracklet.bbox[0],
+                            tracklet.bbox[1],
+                            tracklet.bbox[2] - tracklet.bbox[0],
+                            tracklet.bbox[3] - tracklet.bbox[1],
+                            tracklet.confidence,
+                            -1,
+                            -1,
+                            -1,
+                        )
+                    )

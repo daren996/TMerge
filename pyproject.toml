@@ -21,7 +21,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "matplotlib>=3.8",
   "mypy>=1.9",
+  "motmetrics>=1.4",
   "pytest>=8.0",
   "ruff>=0.4.0",
 ]
@@ -34,6 +36,12 @@ openmmlab = [
 reid = [
   "torch>=2.2",
   "torchreid",
+  "tensorboard",
+  "yacs",
+]
+mot = [
+  "matplotlib>=3.8",
+  "motmetrics>=1.4",
 ]
 
 [project.scripts]
@@ -52,6 +60,19 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = [
+  "e2e",
+  "scripts",
+  "src/tmerge.egg-info",
+  "tools",
+  "videosys",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
 
 [tool.ruff.lint]
 select = [
@@ -62,11 +83,17 @@ select = [
   "UP",
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["tmerge"]
+
 [tool.mypy]
+files = ["src/tmerge", "tests"]
 python_version = "3.10"
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 strict_optional = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
 ignore_missing_imports = true
-

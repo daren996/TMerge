@@ -9,6 +9,12 @@ The repository includes two layers:
 - legacy research code under `videosys`, `e2e`, and `scripts` for reference and
   dataset-specific experiments
 
+Naming note:
+
+- `src/` is the source layout root
+- `tmerge` is the modern package name
+- `videosys` is a legacy namespace retained for migration
+
 ## Overview
 
 TMerge is organized around YAML configuration files and a single CLI entrypoint.
@@ -119,6 +125,39 @@ tmerge export features examples/export.track-features.yaml
 tmerge train reid examples/train.reid.yaml
 ```
 
+Canonical training configs now live under `configs/training/reid/`.
+The older `config/train/reid/` directory should be treated as legacy migration material.
+
+### Evaluate, visualize, and export MOT results
+
+Evaluate a result file against MOT ground truth:
+
+```bash
+tmerge mot evaluate \
+  --ground-truth /path/to/MOT17/train/MOT17-11-DPM/gt/gt.txt \
+  --result /tmp/MOT17-11-DPM-faster_rcnn-sort.txt
+```
+
+Visualize tracking results on images or video:
+
+```bash
+tmerge mot visualize \
+  --data /path/to/MOT17/train/MOT17-11-DPM/img1 \
+  --result /tmp/MOT17-11-DPM-faster_rcnn-sort.txt \
+  --start-frame 1 \
+  --wait-ms 100
+```
+
+Export a rendered MOT video:
+
+```bash
+tmerge mot export-video \
+  --data /path/to/MOT17/train/MOT17-11-DPM/img1 \
+  --result /tmp/MOT17-11-DPM-faster_rcnn-sort.txt \
+  --output /tmp/MOT17-11-DPM-faster_rcnn-sort.mp4 \
+  --fps 30
+```
+
 ### Override config values from the CLI
 
 ```bash
@@ -134,6 +173,9 @@ The package exposes the `tmerge` command:
 
 ```bash
 tmerge run pipeline <config.yaml>
+tmerge mot evaluate --ground-truth <gt.txt> --result <result.txt>
+tmerge mot visualize --data <img-dir-or-video> --result <result.txt>
+tmerge mot export-video --data <img-dir-or-video> --result <result.txt> --output <out.mp4>
 tmerge export tracks <config.yaml>
 tmerge export features <config.yaml>
 tmerge train reid <config.yaml>
@@ -185,11 +227,20 @@ runtime starts.
 ## Repository Layout
 
 - `src/tmerge/`: packaged runtime, CLI, config loader, operators, and training
+- `configs/`: maintained YAML workflows, including migrated MOT pipelines
+- `configs/training/`: maintained training configs for the modern CLI
 - `examples/`: sample YAML configs
 - `tests/`: unit and integration tests for the packaged workflow
 - `docs/appendix/`: dependency and migration notes
+- `legacy/`: index and policy notes for historical assets
 - `docs/*.md`: dataset and script cheat sheets
 - `videosys/`, `e2e/`, `scripts/`: legacy research and experiment code
+
+The important convention is:
+
+- build new things in `src/tmerge/`
+- migrate stable workflows into `configs/`
+- treat `videosys/`, `e2e/`, and `scripts/` as legacy unless explicitly being ported
 
 ## Development
 
@@ -210,6 +261,7 @@ mypy src
 
 - `docs/appendix/dependencies.md`: dependency layout and install options
 - `docs/appendix/migration.md`: notes on the package-first workflow
+- `docs/appendix/project-layout.md`: directory responsibilities and naming guidance
 - `docs/mot_cheatsheet.md`: MOT-related commands
 - `docs/kitti_cheatsheet.md`: KITTI-related commands
 - `docs/pathtrack_cheatsheet.md`: PathTrack-related commands
@@ -224,6 +276,7 @@ The following legacy experiment configs now have YAML replacements:
 - `e2e/configs/tracking/mmt_sort_private.py` -> `configs/mot/mmdet_sort.yaml`
 - `e2e/configs/tracking/mmt_deepsort_private.py` -> `configs/mot/mmdet_deepsort.yaml`
 - `e2e/configs/tracking/mmt_tracktor_private.py` -> `configs/mot/mmdet_tracktor.yaml`
+- `config/train/reid/*.yaml` -> `configs/training/reid/*.yaml`
 
 ## Citation
 

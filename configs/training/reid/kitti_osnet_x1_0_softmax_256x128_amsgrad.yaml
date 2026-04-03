@@ -1,0 +1,43 @@
+model:
+  name: "osnet_x1_0"
+  pretrained: true
+  load_weights: ../storage/models/reid/osnet_x1_0_imagenet.pth
+
+data:
+  root: "../storage/dataset/KITTI/"
+  type: "image"
+  sources: ["kitti"]
+  targets: ["kitti"]
+  height: 256
+  width: 128
+  combineall: false
+  transforms: ["random_flip"]
+  save_dir: "log/osnet_x1_0_kitti_softmax_rx_noexc"
+
+mot:
+  vis_threshold: 0.3
+  exclude_sequences: []
+
+loss:
+  name: "softmax"
+  softmax:
+    label_smooth: true
+
+train:
+  optim: "amsgrad"
+  lr: 0.0015
+  max_epoch: 5
+  batch_size: 64
+  fixbase_epoch: 0
+  open_layers: ["classifier"]
+  lr_scheduler: "single_step"
+  stepsize: [60]
+
+test:
+  batch_size: 64
+  dist_metric: "euclidean"
+  normalize_feature: false
+  evaluate: false
+  eval_freq: -1
+  rerank: false
+
